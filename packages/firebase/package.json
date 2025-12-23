@@ -1,5 +1,5 @@
 {
-  "name": "firebase",
+  "name": "@mishki/firebase",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
