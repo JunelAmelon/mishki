@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Search, Download, Eye, Filter, Calendar, FileText } from 'lucide-react';
 import { useInvoicesB2B } from '../hooks/useInvoicesB2B';
+import InvoiceDownloadButton from '@/components/invoice/InvoiceDownloadButton';
 
 export default function FacturesPro() {
   const t = useTranslations('b2b.invoices');
@@ -350,6 +351,14 @@ export default function FacturesPro() {
                               <Download className="w-4 h-4" />
                             </a>
                           </>
+                        ) : facture.invoiceData ? (
+                          <InvoiceDownloadButton
+                            data={facture.invoiceData}
+                            className="p-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors inline-flex"
+                            fileName={`facture-${facture.numero}.pdf`}
+                            label={<Download className="w-4 h-4" aria-label={t('table.action_download')} />}
+                            templateOverride={facture.locale}
+                          />
                         ) : (
                           <span className="text-xs text-gray-400">{t('table.no_pdf')}</span>
                         )}

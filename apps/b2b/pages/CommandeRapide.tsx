@@ -4,10 +4,13 @@ import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import { Zap, Plus, Trash2, ShoppingCart, Minus } from 'lucide-react';
-import { collection, db, getDocs } from '@mishki/firebase';
+import { collection, db, getDocs, query, where, doc, getDoc } from '@mishki/firebase';
 import { useCart } from '../context/CartContext';
 import { useProductsB2B, type ProductB2B } from '../hooks/useProductsB2B';
 import { useAuth } from '../context/AuthContext';
+import PaypalButton from '@/components/payments/PaypalButton';
+import { useCheckoutB2B } from '../hooks/useCheckoutB2B';
+import PaymentSuccessModal from '../components/PaymentSuccessModal';
 
 interface OrderLine {
   id: string;
@@ -16,6 +19,17 @@ interface OrderLine {
   quantite: number;
   prixHT: number;
   image: string;
+}
+
+interface OrderDoc {
+  lines?: OrderLine[];
+  createdAt?: string;
+  userId?: string;
+  user?: { id?: string } | null;
+  userUID?: string;
+  uid?: string;
+  items?: { reference?: string; slug?: string; id?: string; quantite?: number; quantity?: number; qty?: number }[];
+  orderItems?: { reference?: string; slug?: string; id?: string; quantite?: number; quantity?: number; qty?: number }[];
 }
 
 const MIN_QTY = 100;
@@ -27,9 +41,20 @@ export default function CommandeRapide() {
   const [validatedProducts, setValidatedProducts] = useState<Map<string, ProductB2B>>(new Map());
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [orderCounts, setOrderCounts] = useState<Map<string, number>>(new Map());
-  const { addToCart, items: cartItems } = useCart();
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paypalError, setPaypalError] = useState('');
+  const [paypalAmount, setPaypalAmount] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [orderIdSnapshot, setOrderIdSnapshot] = useState<string | null>(null);
+  const [linesSnapshot, setLinesSnapshot] = useState<
+    { description: string; code?: string; qty: number; unitPrice: number }[]
+  >([]);
+  const [totalsSnapshot, setTotalsSnapshot] = useState<{ subtotalHT: number; tax: number; totalTTC: number; currency: string } | null>(null);
+  const {} = useCart(); // cart not used here
   const { products, loading, error } = useProductsB2B();
   const { user } = useAuth();
+  const { createOrderAndPayment } = useCheckoutB2B();
   const t = useTranslations('b2b.quick_order');
   const locale = useLocale();
 
@@ -68,11 +93,17 @@ export default function CommandeRapide() {
         return;
       }
       try {
-        const snap = await getDocs(collection(db, 'orders'));
+        const ordersRef = collection(db, 'orders');
+        const ordersQuery = user.id
+          ? query(ordersRef, where('userId', '==', user.id))
+          : ordersRef;
+        const snap = await getDocs(ordersQuery);
+        const orderMap = new Map<string, OrderDoc>();
         if (cancelled) return;
         const counts = new Map<string, number>();
         snap.docs.forEach((doc) => {
-          const data = doc.data();
+          const data = doc.data() as OrderDoc;
+          orderMap.set(doc.id, data);
           const orderUserId = data.userId || data.user?.id || data.userUID || data.uid;
           if (!orderUserId || orderUserId !== user.id) return;
           const items = (data.items as { reference?: string; slug?: string; id?: string; quantite?: number; quantity?: number; qty?: number }[]) ||
@@ -84,6 +115,31 @@ export default function CommandeRapide() {
             counts.set(ref, (counts.get(ref) || 0) + qty);
           });
         });
+
+        // Fallback via payments userId -> orderId -> fetch order (if userId absent in order)
+        const paymentsSnap = await getDocs(query(collection(db, 'payments'), where('userId', '==', user.id)));
+        for (const p of paymentsSnap.docs) {
+          const data = p.data() as { orderId?: string };
+          const orderId = data.orderId;
+          if (!orderId) continue;
+          let orderData = orderMap.get(orderId);
+          if (!orderData) {
+            const orderDoc = await getDoc(doc(db, 'orders', orderId));
+            if (orderDoc.exists()) {
+              orderData = orderDoc.data() as OrderDoc;
+            }
+          }
+          if (!orderData) continue;
+          const items = (orderData.items as { reference?: string; slug?: string; id?: string; quantite?: number; quantity?: number; qty?: number }[]) ||
+            (orderData.orderItems as { reference?: string; slug?: string; id?: string; quantite?: number; quantity?: number; qty?: number }[]) || [];
+          items.forEach((item) => {
+            const ref = normalizeRef(item.reference || item.slug || item.id || '');
+            if (!ref) return;
+            const qty = Number(item.quantite ?? item.quantity ?? item.qty ?? 0) || 1;
+            counts.set(ref, (counts.get(ref) || 0) + qty);
+          });
+        }
+
         setOrderCounts(counts);
       } catch (e) {
         console.error('CommandeRapide: erreur récupération commandes', e);
@@ -96,39 +152,41 @@ export default function CommandeRapide() {
   }, [user]);
 
   const commonProducts = useMemo(() => {
+    // Nombre dynamique : on affiche jusqu'à 12 refs ou moins si catalogue plus petit.
+    const maxItems = Math.min(12, productByRef.size || products.length || 12);
+
+    // Priorité : références les plus commandées par l'utilisateur courant.
+    const orderRefs = orderCounts.size
+      ? Array.from(orderCounts.entries())
+          .sort((a, b) => b[1] - a[1])
+          .map(([ref]) => ref)
+      : [];
+
     const picked: ProductB2B[] = [];
-    const addRefs = (refs: string[]) => {
-      refs.forEach((ref) => {
-        if (picked.length >= 6) return;
+    orderRefs.forEach((ref) => {
+      if (picked.length >= maxItems) return;
+      const prod = productByRef.get(ref);
+      if (prod && !picked.some((p) => normalizeRef(p.reference) === ref)) {
+        picked.push(prod);
+      }
+    });
+
+    // Fallback : premières références du catalogue par ordre alpha si aucune ou pas assez de commandes.
+    if (picked.length < maxItems) {
+      const sortedAll = [...products]
+        .sort((a, b) => a.reference.localeCompare(b.reference))
+        .map((p) => normalizeRef(p.reference));
+      sortedAll.forEach((ref) => {
+        if (picked.length >= maxItems) return;
         const prod = productByRef.get(ref);
         if (prod && !picked.some((p) => normalizeRef(p.reference) === ref)) {
           picked.push(prod);
         }
       });
-    };
-
-    const orderRefs = orderCounts.size
-      ? Array.from(orderCounts.entries()).sort((a, b) => b[1] - a[1]).map(([ref]) => ref)
-      : [];
-    addRefs(orderRefs);
-
-    if (picked.length < 6) {
-      const cartCounts = new Map<string, number>();
-      cartItems.forEach((item) => {
-        const ref = normalizeRef(item.reference || item.id);
-        cartCounts.set(ref, (cartCounts.get(ref) || 0) + item.quantite);
-      });
-      const cartRefs = Array.from(cartCounts.entries()).sort((a, b) => b[1] - a[1]).map(([ref]) => ref);
-      addRefs(cartRefs);
     }
 
-    if (picked.length < 6) {
-      const sortedAll = [...products].sort((a, b) => a.reference.localeCompare(b.reference)).map((p) => normalizeRef(p.reference));
-      addRefs(sortedAll);
-    }
-
-    return picked.slice(0, 6);
-  }, [cartItems, orderCounts, productByRef, products]);
+    return picked.slice(0, maxItems);
+  }, [orderCounts, productByRef, products]);
 
   const addLine = () => {
     setOrderLines([
@@ -209,7 +267,7 @@ export default function CommandeRapide() {
     });
   };
 
-  const handleSubmitOrder = () => {
+  const handleOpenPaymentModal = () => {
     let hasError = false;
     setFeedback(null);
     orderLines.forEach((line) => {
@@ -222,25 +280,83 @@ export default function CommandeRapide() {
         hasError = true;
         return;
       }
-      addToCart(
-        {
-          id: product.reference,
-          nom: product.nom,
-          reference: product.reference,
-          prixHT: product.prixHT,
-          image: product.image,
-        },
-        Math.max(MIN_QTY, line.quantite)
-      );
     });
+    if (hasError || validatedProducts.size === 0) {
+      setFeedback({ type: 'error', message: t('error_msg') });
+      return;
+    }
+    setPaypalAmount(calculateTotal());
+    setPaypalError('');
+    setShowPaymentModal(true);
+  };
 
-    if (!hasError) {
+  const handlePaypalSuccess = async (payload?: { orderId?: string }) => {
+    setSaving(true);
+    try {
+      const totalHT = calculateTotal();
+      const lines = orderLines
+        .map((line) => {
+          const product = validatedProducts.get(line.id);
+          if (!product) return null;
+          const qty = Math.max(MIN_QTY, line.quantite);
+          return {
+            name: product.nom,
+            reference: product.reference,
+            quantity: qty,
+            unitPriceHT: product.prixHT,
+            totalHT: product.prixHT * qty,
+          };
+        })
+        .filter(Boolean) as {
+          name: string;
+          reference: string;
+          quantity: number;
+          unitPriceHT: number;
+          totalHT: number;
+        }[];
+
+      const totals = {
+        subtotalHT: totalHT,
+        tax: totalHT * 0.2,
+        totalTTC: totalHT * 1.2,
+        currency: 'EUR' as const,
+      };
+
+      await createOrderAndPayment({
+        user,
+        lines,
+        totals,
+        paymentProvider: 'paypal',
+        paymentId: payload?.orderId ?? null,
+        status: 'payee',
+      });
+
+      const invoiceLines = lines.map((l) => ({
+        description: l.name,
+        code: l.reference,
+        qty: l.quantity,
+        unitPrice: l.unitPriceHT,
+      }));
+
       setFeedback({ type: 'success', message: t('success_msg') });
       setOrderLines([{ id: Date.now().toString(), reference: '', nom: '', quantite: MIN_QTY, prixHT: 0, image: '' }]);
       setValidatedProducts(new Map());
-    } else {
-      setFeedback({ type: 'error', message: t('error_msg') });
+      setShowPaymentModal(false);
+      setPaypalError('');
+      setOrderIdSnapshot(payload?.orderId ?? null);
+      setLinesSnapshot(invoiceLines);
+      setTotalsSnapshot(totals);
+      setShowSuccessModal(true);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Erreur de paiement PayPal';
+      setPaypalError(msg);
+    } finally {
+      setSaving(false);
     }
+  };
+
+  const handlePaypalError = (msg: string) => {
+    setPaypalError(msg || 'Erreur de paiement PayPal');
   };
 
   const calculateTotal = () => {
@@ -254,6 +370,7 @@ export default function CommandeRapide() {
   };
 
   return (
+    <>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between">
@@ -428,7 +545,7 @@ export default function CommandeRapide() {
                 <p className="text-2xl text-gray-900">{formatMoney.format(calculateTotal())} {htLabel}</p>
               </div>
               <button
-                onClick={handleSubmitOrder}
+                onClick={handleOpenPaymentModal}
                 disabled={validatedProducts.size === 0}
                 className="flex items-center gap-2 px-6 py-3 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: '#235730' }}
@@ -465,6 +582,49 @@ export default function CommandeRapide() {
         </div>
       </div>
     </div>
+    {showPaymentModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
+          <button
+            onClick={() => setShowPaymentModal(false)}
+            className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+          >
+            ✕
+          </button>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Paiement PayPal</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            {t('total_label')} : <span className="font-semibold text-gray-900">{formatMoney.format(paypalAmount)} {htLabel}</span>
+          </p>
+          {paypalError && (
+            <div className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              {paypalError}
+            </div>
+          )}
+          {saving && <p className="text-sm text-gray-500 mb-2">Traitement en cours...</p>}
+          <PaypalButton
+            amount={paypalAmount}
+            currency="EUR"
+            disabled={saving}
+            onSuccess={handlePaypalSuccess}
+            onError={handlePaypalError}
+          />
+        </div>
+      </div>
+    )}
+    {showSuccessModal && totalsSnapshot && (
+      <PaymentSuccessModal
+        open={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        orderId={orderIdSnapshot}
+        lines={linesSnapshot}
+        totals={totalsSnapshot}
+        buyer={{
+          name: user?.societe || user?.nom || 'Client B2B',
+          email: user?.email || undefined,
+        }}
+      />
+    )}
+    </>
   );
 }
 

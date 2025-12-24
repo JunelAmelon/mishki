@@ -16,14 +16,26 @@ import {
   Package,
   CreditCard,
 } from 'lucide-react';
+import PaypalButton from '@/components/payments/PaypalButton';
+import { useCheckoutB2B } from '../hooks/useCheckoutB2B';
+import PaymentSuccessModal from '../components/PaymentSuccessModal';
 
 export default function Panier() {
   const t = useTranslations('b2b.cart');
   const locale = useLocale();
   const { items, removeFromCart, updateQuantity, clearCart, total } = useCart();
   const { user } = useAuth();
+  const { createOrderAndPayment } = useCheckoutB2B();
   const router = useRouter();
-  const [orderConfirmed, setOrderConfirmed] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paypalError, setPaypalError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [orderIdSnapshot, setOrderIdSnapshot] = useState<string | null>(null);
+  const [linesSnapshot, setLinesSnapshot] = useState<
+    { description: string; code?: string; qty: number; unitPrice: number }[]
+  >([]);
+  const [totalsSnapshot, setTotalsSnapshot] = useState<{ subtotalHT: number; tax: number; totalTTC: number; currency: string } | null>(null);
   const minQty = 100;
 
   const formatMoney = useMemo(
@@ -61,39 +73,65 @@ export default function Panier() {
   const totalRemise = total - totalHT;
   const tva = totalHT * 0.2;
   const totalTTC = totalHT + tva;
+  const paypalAmount = totalTTC;
 
-  const handleValidateOrder = () => {
-    setOrderConfirmed(true);
-    setTimeout(() => {
-      clearCart();
-      router.push('/pro/accueil');
-    }, 3000);
+  const openPaymentModal = () => {
+    setPaypalError('');
+    setShowPaymentModal(true);
   };
 
-  if (orderConfirmed) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="bg-white rounded-xl border border-gray-200 p-8 md:p-12 max-w-md text-center">
-          <div
-            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-            style={{ backgroundColor: '#235730' }}
-          >
-            <Check className="w-8 h-8 text-white" />
-          </div>
-          <h2 className="text-gray-900 mb-2 text-xl md:text-2xl">{t('confirmed.title')}</h2>
-          <p className="text-gray-600 mb-6">
-            {t('confirmed.subtitle')}
-          </p>
-          <div className="flex items-center justify-center gap-2 text-sm" style={{ color: '#235730' }}>
-            <Package className="w-4 h-4" />
-            {t('confirmed.redirecting')}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handlePaypalSuccess = async (payload?: { orderId?: string }) => {
+    setSaving(true);
+    try {
+      const lines = items.map((item) => {
+        const prixRemise = calculateRemise(item.prixHT);
+        return {
+          name: item.nom,
+          reference: item.reference,
+          quantity: item.quantite,
+          unitPriceHT: prixRemise,
+          totalHT: prixRemise * item.quantite,
+        };
+      });
+      const invoiceLines = lines.map((l) => ({
+        description: l.name,
+        code: l.reference,
+        qty: l.quantity,
+        unitPrice: l.unitPriceHT,
+      }));
+      const totals = {
+        subtotalHT: totalHT,
+        tax: tva,
+        totalTTC,
+        currency: 'EUR' as const,
+      };
+      await createOrderAndPayment({
+        user,
+        lines,
+        totals,
+        paymentProvider: 'paypal',
+        paymentId: payload?.orderId ?? null,
+        status: 'payee',
+      });
+      setShowPaymentModal(false);
+      setOrderIdSnapshot(payload?.orderId ?? null);
+      setLinesSnapshot(invoiceLines);
+      setTotalsSnapshot(totals);
+      setShowSuccessModal(true);
+      clearCart();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Erreur de paiement PayPal';
+      setPaypalError(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
 
-  if (items.length === 0) {
+  const handlePaypalError = (msg: string) => {
+    setPaypalError(msg || 'Erreur de paiement PayPal');
+  };
+
+  if (items.length === 0 && !showPaymentModal && !showSuccessModal) {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
@@ -132,6 +170,7 @@ export default function Panier() {
   }
 
   return (
+    <>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -295,7 +334,7 @@ export default function Panier() {
             </div>
 
             <button
-              onClick={handleValidateOrder}
+              onClick={openPaymentModal}
               className="w-full py-3 rounded-lg text-white transition-colors flex items-center justify-center gap-2 mb-3"
               style={{ backgroundColor: '#235730' }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1a4023')}
@@ -327,6 +366,49 @@ export default function Panier() {
         </div>
       </div>
     </div>
+    {showPaymentModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
+          <button
+            onClick={() => setShowPaymentModal(false)}
+            className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+          >
+            ✕
+          </button>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Paiement PayPal</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            {t('summary.total_ttc')} ({ttcLabel}) : <span className="font-semibold text-gray-900">{formatMoney.format(totalTTC)}</span>
+          </p>
+          {paypalError && (
+            <div className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              {paypalError}
+            </div>
+          )}
+          {saving && <p className="text-sm text-gray-500 mb-2">Traitement en cours...</p>}
+          <PaypalButton
+            amount={paypalAmount}
+            currency="EUR"
+            disabled={saving}
+            onSuccess={handlePaypalSuccess}
+            onError={handlePaypalError}
+          />
+        </div>
+      </div>
+    )}
+    {showSuccessModal && totalsSnapshot && (
+      <PaymentSuccessModal
+        open={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        orderId={orderIdSnapshot}
+        lines={linesSnapshot}
+        totals={totalsSnapshot}
+        buyer={{
+          name: user?.societe || user?.nom || 'Client B2B',
+          email: user?.email || undefined,
+        }}
+      />
+    )}
+    </>
   );
 }
 

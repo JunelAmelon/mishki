@@ -17,8 +17,9 @@ export default function Login() {
         throw new Error(json.error || 'Erreur seeding');
       }
       setSeedResult('Seeder exécuté avec succès ✅');
-    } catch (err: any) {
-      setSeedResult(`Erreur: ${err?.message || 'échec seeding'}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'échec seeding';
+      setSeedResult(`Erreur: ${message}`);
     } finally {
       setSeeding(false);
     }

@@ -17,6 +17,7 @@ interface CartContextType {
   addToCart: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void
   updateQuantity: (id: string, quantity: number) => void
   removeFromCart: (id: string) => void
+  removeItems: (ids: string[]) => void
   clearCart: () => void
   setCartOwner: (userId: string | null) => void
   checkoutItems: CartItem[]
@@ -110,6 +111,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems(currentItems => currentItems.filter(item => item.id !== id))
   }
 
+  const removeItems = (ids: string[]) => {
+    if (!ids.length) return
+    const idSet = new Set(ids)
+    setItems(currentItems => currentItems.filter(item => !idSet.has(item.id)))
+  }
+
   const clearCart = () => {
     setItems([])
   }
@@ -138,7 +145,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <CartContext.Provider value={{ items, itemCount, addToCart, updateQuantity, removeFromCart, clearCart, setCartOwner, checkoutItems, prepareCheckout }}>
+    <CartContext.Provider value={{ items, itemCount, addToCart, updateQuantity, removeFromCart, removeItems, clearCart, setCartOwner, checkoutItems, prepareCheckout }}>
       {children}
     </CartContext.Provider>
   )

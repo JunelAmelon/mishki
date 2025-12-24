@@ -6,21 +6,28 @@ import { CreditCard, Check, Info } from 'lucide-react'
 import { Button } from '@/apps/b2c/components/ui/button'
 import { Input } from '@/apps/b2c/components/ui/input'
 import { Label } from '@/apps/b2c/components/ui/label'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Header } from '@/apps/b2c/components/header'
 import { Footer } from '@/apps/b2c/components/footer'
 import { NewsletterSection } from '@/apps/b2c/components/newsletter-section'
 import { useCart } from '@/apps/b2c/lib/cart-context'
 import { useTranslations } from 'next-intl'
 import { useLocale } from 'next-intl'
+import PaypalButton from '@/components/payments/PaypalButton'
+import { useCheckout } from '@/apps/b2c/hooks/useCheckout'
+import InvoiceDownloadButton from '@/components/invoice/InvoiceDownloadButton'
+import { InvoiceData } from '@/lib/invoice/types'
+import { auth } from '@mishki/firebase'
+import { onAuthStateChanged } from 'firebase/auth'
 
 type Step = 'livraison' | 'paiement'
 
 export default function PaymentPage() {
   const t = useTranslations('b2c.payment')
   const locale = useLocale()
-  const { items, checkoutItems } = useCart()
+  const { items, checkoutItems, clearCart, removeItems } = useCart()
   const selectedItems = checkoutItems.length > 0 ? checkoutItems : items
+  const { createOrderAndPayment } = useCheckout()
   const [currentStep, setCurrentStep] = useState<Step>('livraison')
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [addressMode, setAddressMode] = useState<'saved' | 'new'>('saved')
@@ -28,6 +35,14 @@ export default function PaymentPage() {
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal'>('card')
   const [deliveryError, setDeliveryError] = useState('')
   const [paymentError, setPaymentError] = useState('')
+  const [paypalError, setPaypalError] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [orderId, setOrderId] = useState<string | null>(null)
+  const [orderLinesSnapshot, setOrderLinesSnapshot] = useState<
+    { name: string; quantity: number; priceTTC: number; slug?: string }[]
+  >([])
+  const [totalsSnapshot, setTotalsSnapshot] = useState<{ subtotal: number; tax: number; total: number; currency: string } | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
     address: '',
@@ -42,6 +57,14 @@ export default function PaymentPage() {
     cvc: '',
   })
 
+  // Capture userId for order persistence
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      setUserId(user?.uid ?? null)
+    })
+    return () => unsub()
+  }, [])
+
   const formatMoney = useMemo(
     () =>
       new Intl.NumberFormat(locale, {
@@ -54,6 +77,23 @@ export default function PaymentPage() {
   )
 
   const cartTotal = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const userRegion = useMemo(() => {
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone?.toLowerCase()
+      if (tz?.includes('lima') || tz?.includes('peru')) return 'pe' as const
+      if (tz?.includes('paris') || tz?.includes('europe/paris')) return 'fr' as const
+    } catch {
+      // ignore
+    }
+    const lowerLocale = locale.toLowerCase()
+    if (lowerLocale.includes('pe')) return 'pe' as const
+    return 'fr' as const
+  }, [locale])
+  const taxRate = userRegion === 'pe' ? 0.18 : 0.2
+  const subtotalHT = cartTotal / (1 + taxRate)
+  const taxAmount = cartTotal - subtotalHT
+  const totalTTC = cartTotal
+  const round2 = (n: number) => Math.round(n * 100) / 100
 
   const updateFormData = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -74,6 +114,10 @@ export default function PaymentPage() {
   }
 
   const validatePayment = () => {
+    if (paymentMethod === 'paypal') {
+      setPaymentError('')
+      return true
+    }
     const missing: string[] = []
     if (paymentMethod === 'card') {
       if (!formData.cardName.trim()) missing.push('cardName')
@@ -104,8 +148,107 @@ export default function PaymentPage() {
 
   const handleValidate = () => {
     if (!validatePayment()) return
-    setShowConfirmation(true)
+    if (paymentMethod === 'card') {
+      void persistOrder('card')
+    }
   }
+
+  const paypalAmount = totalTTC
+  const persistOrder = async (provider: 'paypal' | 'card', paymentId?: string | null) => {
+    setPaymentError('')
+    setPaypalError('')
+    const linesSnapshot = selectedItems.map((item) => ({
+      name: item.name,
+      quantity: item.quantity,
+      priceTTC: item.price,
+      slug: item.id,
+    }))
+    const totals = {
+      subtotal: round2(subtotalHT),
+      tax: round2(taxAmount),
+      total: round2(totalTTC),
+      currency: 'EUR',
+    }
+    setSaving(true)
+    try {
+      const id = await createOrderAndPayment({
+        userId,
+        lines: linesSnapshot.map((l) => ({ name: l.name, quantity: l.quantity, price: l.priceTTC, slug: l.slug })),
+        totals,
+        paymentProvider: provider,
+        paymentId,
+        status: 'payee',
+      })
+      setOrderId(id)
+      setOrderLinesSnapshot(linesSnapshot)
+      setTotalsSnapshot(totals)
+      setShowConfirmation(true)
+      // on ne retire que les articles payés
+      const paidIds = linesSnapshot.map((l) => l.slug).filter(Boolean) as string[]
+      if (paidIds.length) {
+        removeItems(paidIds)
+      } else {
+        clearCart()
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Erreur de paiement'
+      if (provider === 'paypal') {
+        setPaypalError(msg)
+      } else {
+        setPaymentError(msg)
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handlePaypalSuccess = (payload?: { orderId?: string }) => {
+    setPaypalError('')
+    void persistOrder('paypal', payload?.orderId ?? null)
+  }
+  const handlePaypalError = (msg: string) => {
+    setPaypalError(msg || 'Erreur de paiement PayPal')
+  }
+
+  const invoiceData: InvoiceData | null = useMemo(() => {
+    if (!orderId || !orderLinesSnapshot.length || !totalsSnapshot) return null
+    const issueDate = new Date()
+    const buyerAddress = addressMode === 'saved' ? selectedSavedAddress : formData.address
+    const invoiceNumber = `INV-${orderId.slice(0, 8)}`
+    return {
+      locale: userRegion,
+      invoiceNumber,
+      orderNumber: orderId,
+      issueDate: issueDate.toLocaleDateString('fr-FR'),
+      buyer: {
+        name: 'Client B2C',
+        addressLines: [buyerAddress || 'Adresse client', formData.city || '', formData.postalCode || ''].filter(Boolean),
+        phone: formData.phone || undefined,
+      },
+      seller: {
+        name: 'MISHKI LAB',
+        addressLines: ['5 Rue du Printemps', '88000 Jeuxey', 'France'],
+        siret: '92089652300011',
+        ape: '2042Z',
+        email: 'facturation@mishki.com',
+      },
+      payment: { terms: 'Paiement en ligne (carte/PayPal)' },
+      lines: orderLinesSnapshot.map((l) => ({
+        qty: l.quantity,
+        unit: 'pcs',
+        code: l.slug,
+        description: l.name,
+        unitPrice: round2(l.priceTTC / (1 + taxRate)), // HT unitaire
+      })),
+      totals: {
+        subtotal: totalsSnapshot.subtotal,
+        taxLabel: userRegion === 'pe' ? 'IGV 18%' : 'TVA 20%',
+        taxAmount: totalsSnapshot.tax,
+        total: totalsSnapshot.total,
+        currency: 'EUR',
+      },
+    }
+  }, [orderId, orderLinesSnapshot, totalsSnapshot, addressMode, formData.address, formData.city, formData.postalCode, formData.phone, userRegion, selectedSavedAddress, taxRate])
 
   if (showConfirmation) {
     return (
@@ -135,6 +278,16 @@ export default function PaymentPage() {
                 </Button>
               </Link>
             </div>
+            {invoiceData && (
+              <div className="mt-6">
+                <InvoiceDownloadButton
+                  data={invoiceData}
+                  fileName={`${invoiceData.invoiceNumber}.pdf`}
+                  label="Télécharger la facture"
+                  className="w-full justify-center px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700 transition"
+                />
+              </div>
+            )}
           </div>
         </div>
         <Footer />
@@ -216,9 +369,19 @@ export default function PaymentPage() {
                         </span>
                       </div>
                     ))}
-                    <div className="pt-3 mt-3 border-t border-gray-200 flex justify-between text-sm font-semibold text-[#2d2d2d]">
-                      <span>Total</span>
-                      <span>{formatMoney.format(cartTotal)}</span>
+                    <div className="pt-3 mt-3 border-t border-gray-200 space-y-1 text-sm text-[#2d2d2d]">
+                      <div className="flex justify-between">
+                        <span>Sous-total HT</span>
+                        <span>{formatMoney.format(subtotalHT)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>TVA (20%)</span>
+                        <span>{formatMoney.format(taxAmount)}</span>
+                      </div>
+                      <div className="flex justify-between font-semibold text-base">
+                        <span>Total TTC</span>
+                        <span>{formatMoney.format(totalTTC)}</span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -502,11 +665,19 @@ export default function PaymentPage() {
                     )}
 
                     {paymentMethod === 'paypal' && (
-                      <div className="p-4 border border-dashed border-[#235730] rounded-md bg-[#235730]/5 text-sm text-[#235730]">
+                      <div className="p-4 border border-dashed border-[#235730] rounded-md bg-[#235730]/5 text-sm text-[#235730] space-y-2">
                         <p className="font-medium mb-1">PayPal</p>
                         <p className="text-[#235730]/80">
                           Vous serez redirigé vers PayPal pour finaliser votre paiement en toute sécurité.
                         </p>
+                        <PaypalButton
+                          amount={paypalAmount}
+                          currency="EUR"
+                          onSuccess={handlePaypalSuccess}
+                          onError={handlePaypalError}
+                          disabled={saving}
+                        />
+                        {paypalError && <p className="text-red-600 text-xs">{paypalError}</p>}
                       </div>
                     )}
                   </div>
@@ -520,11 +691,15 @@ export default function PaymentPage() {
                     </button>
                     <Button
                       onClick={handleValidate}
-                      className="bg-[#235730] hover:bg-[#1d4626] text-white rounded-sm px-8"
+                      disabled={saving}
+                      className="bg-[#235730] hover:bg-[#1d4626] disabled:opacity-60 text-white rounded-sm px-8"
                     >
-                      {t('sections.payment.next')}
+                      {saving ? 'Traitement...' : t('sections.payment.pay')}
                     </Button>
                   </div>
+                  {paymentError && (
+                    <p className="text-red-600 text-sm text-center pt-2">{paymentError}</p>
+                  )}
                 </div>
               )}
             </div>
