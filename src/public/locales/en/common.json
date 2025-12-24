@@ -74,11 +74,18 @@
             "register": {
                 "title": "Professional Registration",
                 "subtitle": "Create your B2B account with exclusive tax-exclusive pricing and discounts",
+                "title_b2c": "Create my Mishki account",
+                "subtitle_b2c": "Join the Mishki community and enjoy exclusive offers",
                 "sections": {
                     "personal": "Personal information",
                     "connection": "Login information",
                     "company": "Company information",
-                    "documents": "Documents"
+                    "documents": "Documents",
+                    "address": "Contact details"
+                },
+                "tabs": {
+                    "b2c": "Customer account",
+                    "b2b": "Professional account"
                 },
                 "fields": {
                     "first_name": "First Name *",
@@ -129,6 +136,7 @@
                 "cgv": "terms and conditions of sale",
                 "privacy": "privacy policy",
                 "btn_submit": "Create my professional account",
+                "btn_submit_b2c": "Create my account",
                 "btn_submitting": "Registration in progress...",
                 "btn_cancel": "Cancel",
                 "footer_info": "Your account will be validated within 24-48 hours after verification of your documents",
@@ -868,6 +876,8 @@
                 "payment": {
                     "title": "Payment info",
                     "use_saved": "Use your saved card",
+                    "card_option": "Pay by card",
+                    "paypal_option": "Pay with PayPal",
                     "card_name_label": "Name on card",
                     "card_name_placeholder": "John Smith",
                     "card_number_label": "Card number",

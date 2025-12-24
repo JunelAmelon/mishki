@@ -1,0 +1,6 @@
+[00:00:13.612] Server  LOG      ✓ Ready in 11.8s
+[00:00:17.454] Server  LOG      ○ Compiling /factures ...
+[00:00:28.161] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:30.557] Browser LOG     ProtectedLayout: isLoading= true user= null
+[00:00:30.557] Browser LOG     ProtectedLayout: isLoading= false user= {"email":"test@mishki.com","id":"1","nom":"Dupont","prenom":"Marie","remise":15,"role":"b2b","siret":"12345678900012","societe":"Spa Beauté Paris","validated":true}
+[00:00:30.557] Browser WARN    Image with src "/images/logo-mishki.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.

@@ -1,0 +1,21 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/a-propos/page": "/a-propos",
+  "/blog/[id]/page": "/blog/[id]",
+  "/blog/page": "/blog",
+  "/conditions/page": "/conditions",
+  "/confidentialite/page": "/confidentialite",
+  "/contact/page": "/contact",
+  "/engagement/page": "/engagement",
+  "/livraison/page": "/livraison",
+  "/login/page": "/login",
+  "/page": "/",
+  "/paiement/page": "/paiement",
+  "/panier/page": "/panier",
+  "/podcast/page": "/podcast",
+  "/produits/[id]/page": "/produits/[id]",
+  "/produits/page": "/produits",
+  "/rituels/[id]/page": "/rituels/[id]",
+  "/rituels/page": "/rituels"
+}

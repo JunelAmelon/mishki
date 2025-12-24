@@ -1,0 +1,115 @@
+{
+  "app": {
+    "[project]/apps/b2c/app/_not-found/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/a-propos/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/blog/[id]/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/blog/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/conditions/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/confidentialite/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/contact/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/engagement/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/livraison/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/login/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/paiement/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/panier/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/podcast/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/produits/[id]/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/produits/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/rituels/[id]/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ],
+    "[project]/apps/b2c/app/rituels/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": false,
+  "pages": {},
+  "pagesUsingSizeAdjust": false
+}

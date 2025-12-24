@@ -1,0 +1,6 @@
+__turbopack_load_page_chunks__("/CataloguePro", [
+  "static/chunks/9ab01cd2e4c1f8fc.js",
+  "static/chunks/4cec7f68b5ce9dbd.js",
+  "static/chunks/2c5edc8d52cee6ac.js",
+  "static/chunks/turbopack-9cabb4010640a679.js"
+])

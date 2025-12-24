@@ -19,7 +19,7 @@ export default function LoginPage() {
   const t = useTranslations('b2c.auth.login')
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') ?? '/'
+  const redirect = searchParams?.get('redirect') ?? '/'
   const { setCartOwner } = useCart()
 
   const [email, setEmail] = useState('')

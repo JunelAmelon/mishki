@@ -1,0 +1,21 @@
+{
+  "/(auth)/inscription/page": "app/(auth)/inscription/page.js",
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(auth)/validation-attente/page": "app/(auth)/validation-attente/page.js",
+  "/(protected)/accueil/page": "app/(protected)/accueil/page.js",
+  "/(protected)/catalogue/page": "app/(protected)/catalogue/page.js",
+  "/(protected)/commande-rapide/page": "app/(protected)/commande-rapide/page.js",
+  "/(protected)/devis/page": "app/(protected)/devis/page.js",
+  "/(protected)/factures/page": "app/(protected)/factures/page.js",
+  "/(protected)/page": "app/(protected)/page.js",
+  "/(protected)/panier/page": "app/(protected)/panier/page.js",
+  "/(protected)/protocoles/fiche/[id]/page": "app/(protected)/protocoles/fiche/[id]/page.js",
+  "/(protected)/protocoles/page": "app/(protected)/protocoles/page.js",
+  "/(protected)/protocoles/rituel/[id]/page": "app/(protected)/protocoles/rituel/[id]/page.js",
+  "/(protected)/reassort/page": "app/(protected)/reassort/page.js",
+  "/(protected)/telechargements/page": "app/(protected)/telechargements/page.js",
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/page": "app/page.js"
+}

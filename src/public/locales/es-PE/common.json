@@ -74,11 +74,18 @@
             "register": {
                 "title": "Registro Profesional",
                 "subtitle": "Cree su cuenta B2B con precios al por mayor y descuentos exclusivos",
+                "title_b2c": "Crear mi cuenta Mishki",
+                "subtitle_b2c": "Únete a la comunidad Mishki y disfruta de ofertas exclusivas",
                 "sections": {
                     "personal": "Información personal",
                     "connection": "Información de conexión",
                     "company": "Información de la empresa",
-                    "documents": "Documentos"
+                    "documents": "Documentos",
+                    "address": "Datos de contacto"
+                },
+                "tabs": {
+                    "b2c": "Cuenta de cliente",
+                    "b2b": "Cuenta profesional"
                 },
                 "fields": {
                     "first_name": "Nombre *",
@@ -129,6 +136,7 @@
                 "cgv": "términos y condiciones de venta",
                 "privacy": "política de privacidad",
                 "btn_submit": "Crear mi cuenta profesional",
+                "btn_submit_b2c": "Crear mi cuenta",
                 "btn_submitting": "Registro en curso...",
                 "btn_cancel": "Cancelar",
                 "footer_info": "Su cuenta será validada en 24-48h tras la verificación de sus documentos",
@@ -868,6 +876,8 @@
                 "payment": {
                     "title": "Información de pago",
                     "use_saved": "Usar su tarjeta registrada",
+                    "card_option": "Pagar con tarjeta",
+                    "paypal_option": "Pagar con PayPal",
                     "card_name_label": "Nombre en la tarjeta",
                     "card_name_placeholder": "Juan Pérez",
                     "card_number_label": "Número de tarjeta",

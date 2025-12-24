@@ -1,0 +1,20 @@
+{
+  "/AccueilPro": "pages/AccueilPro.js",
+  "/CataloguePro": "pages/CataloguePro.js",
+  "/CommandeRapide": "pages/CommandeRapide.js",
+  "/DemandeDevis": "pages/DemandeDevis.js",
+  "/FacturesPro": "pages/FacturesPro.js",
+  "/FicheTechnique": "pages/FicheTechnique.js",
+  "/Panier": "pages/Panier.js",
+  "/Protocoles": "pages/Protocoles.js",
+  "/ReassortAuto": "pages/ReassortAuto.js",
+  "/RituelCabine": "pages/RituelCabine.js",
+  "/Telechargements": "pages/Telechargements.js",
+  "/_app": "pages/_app.js",
+  "/_document": "pages/_document.js",
+  "/_error": "pages/_error.js",
+  "/auth/InscriptionPro": "pages/auth/InscriptionPro.js",
+  "/auth/Login": "pages/auth/Login.js",
+  "/auth/ValidationAttente": "pages/auth/ValidationAttente.js",
+  "/404": "pages/404.html"
+}

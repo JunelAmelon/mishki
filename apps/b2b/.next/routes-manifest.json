@@ -1,0 +1,292 @@
+{
+  "version": 3,
+  "pages404": true,
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "priority": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [
+    {
+      "page": "/protocoles/fiche/[id]",
+      "regex": "^/protocoles/fiche/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/protocoles/fiche/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/protocoles/rituel/[id]",
+      "regex": "^/protocoles/rituel/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/protocoles/rituel/(?<nxtPid>[^/]+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/accueil",
+      "regex": "^/accueil(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/accueil(?:/)?$"
+    },
+    {
+      "page": "/AccueilPro",
+      "regex": "^/AccueilPro(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/AccueilPro(?:/)?$"
+    },
+    {
+      "page": "/auth/InscriptionPro",
+      "regex": "^/auth/InscriptionPro(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/InscriptionPro(?:/)?$"
+    },
+    {
+      "page": "/auth/Login",
+      "regex": "^/auth/Login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/Login(?:/)?$"
+    },
+    {
+      "page": "/auth/ValidationAttente",
+      "regex": "^/auth/ValidationAttente(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/ValidationAttente(?:/)?$"
+    },
+    {
+      "page": "/catalogue",
+      "regex": "^/catalogue(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/catalogue(?:/)?$"
+    },
+    {
+      "page": "/CataloguePro",
+      "regex": "^/CataloguePro(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/CataloguePro(?:/)?$"
+    },
+    {
+      "page": "/commande-rapide",
+      "regex": "^/commande\\-rapide(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/commande\\-rapide(?:/)?$"
+    },
+    {
+      "page": "/CommandeRapide",
+      "regex": "^/CommandeRapide(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/CommandeRapide(?:/)?$"
+    },
+    {
+      "page": "/DemandeDevis",
+      "regex": "^/DemandeDevis(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/DemandeDevis(?:/)?$"
+    },
+    {
+      "page": "/devis",
+      "regex": "^/devis(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/devis(?:/)?$"
+    },
+    {
+      "page": "/factures",
+      "regex": "^/factures(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/factures(?:/)?$"
+    },
+    {
+      "page": "/FacturesPro",
+      "regex": "^/FacturesPro(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/FacturesPro(?:/)?$"
+    },
+    {
+      "page": "/favicon.ico",
+      "regex": "^/favicon\\.ico(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/FicheTechnique",
+      "regex": "^/FicheTechnique(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/FicheTechnique(?:/)?$"
+    },
+    {
+      "page": "/inscription",
+      "regex": "^/inscription(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/inscription(?:/)?$"
+    },
+    {
+      "page": "/login",
+      "regex": "^/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/login(?:/)?$"
+    },
+    {
+      "page": "/panier",
+      "regex": "^/panier(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/panier(?:/)?$"
+    },
+    {
+      "page": "/Panier",
+      "regex": "^/Panier(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/Panier(?:/)?$"
+    },
+    {
+      "page": "/protocoles",
+      "regex": "^/protocoles(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/protocoles(?:/)?$"
+    },
+    {
+      "page": "/Protocoles",
+      "regex": "^/Protocoles(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/Protocoles(?:/)?$"
+    },
+    {
+      "page": "/reassort",
+      "regex": "^/reassort(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/reassort(?:/)?$"
+    },
+    {
+      "page": "/ReassortAuto",
+      "regex": "^/ReassortAuto(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/ReassortAuto(?:/)?$"
+    },
+    {
+      "page": "/RituelCabine",
+      "regex": "^/RituelCabine(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/RituelCabine(?:/)?$"
+    },
+    {
+      "page": "/telechargements",
+      "regex": "^/telechargements(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/telechargements(?:/)?$"
+    },
+    {
+      "page": "/Telechargements",
+      "regex": "^/Telechargements(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/Telechargements(?:/)?$"
+    },
+    {
+      "page": "/validation-attente",
+      "regex": "^/validation\\-attente(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/validation\\-attente(?:/)?$"
+    }
+  ],
+  "dataRoutes": [
+    {
+      "page": "/AccueilPro",
+      "dataRouteRegex": "^/_next/data/I_l0aZnmXEMEs7YXbDuiR/AccueilPro\\.json$"
+    },
+    {
+      "page": "/auth/InscriptionPro",
+      "dataRouteRegex": "^/_next/data/I_l0aZnmXEMEs7YXbDuiR/auth/InscriptionPro\\.json$"
+    },
+    {
+      "page": "/auth/Login",
+      "dataRouteRegex": "^/_next/data/I_l0aZnmXEMEs7YXbDuiR/auth/Login\\.json$"
+    },
+    {
+      "page": "/auth/ValidationAttente",
+      "dataRouteRegex": "^/_next/data/I_l0aZnmXEMEs7YXbDuiR/auth/ValidationAttente\\.json$"
+    },
+    {
+      "page": "/CataloguePro",
+      "dataRouteRegex": "^/_next/data/I_l0aZnmXEMEs7YXbDuiR/CataloguePro\\.json$"
+    },
+    {
+      "page": "/CommandeRapide",
+      "dataRouteRegex": "^/_next/data/I_l0aZnmXEMEs7YXbDuiR/CommandeRapide\\.json$"
+    },
+    {
+      "page": "/DemandeDevis",
+      "dataRouteRegex": "^/_next/data/I_l0aZnmXEMEs7YXbDuiR/DemandeDevis\\.json$"
+    },
+    {
+      "page": "/FacturesPro",
+      "dataRouteRegex": "^/_next/data/I_l0aZnmXEMEs7YXbDuiR/FacturesPro\\.json$"
+    },
+    {
+      "page": "/FicheTechnique",
+      "dataRouteRegex": "^/_next/data/I_l0aZnmXEMEs7YXbDuiR/FicheTechnique\\.json$"
+    },
+    {
+      "page": "/Panier",
+      "dataRouteRegex": "^/_next/data/I_l0aZnmXEMEs7YXbDuiR/Panier\\.json$"
+    },
+    {
+      "page": "/Protocoles",
+      "dataRouteRegex": "^/_next/data/I_l0aZnmXEMEs7YXbDuiR/Protocoles\\.json$"
+    },
+    {
+      "page": "/ReassortAuto",
+      "dataRouteRegex": "^/_next/data/I_l0aZnmXEMEs7YXbDuiR/ReassortAuto\\.json$"
+    },
+    {
+      "page": "/RituelCabine",
+      "dataRouteRegex": "^/_next/data/I_l0aZnmXEMEs7YXbDuiR/RituelCabine\\.json$"
+    },
+    {
+      "page": "/Telechargements",
+      "dataRouteRegex": "^/_next/data/I_l0aZnmXEMEs7YXbDuiR/Telechargements\\.json$"
+    }
+  ],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSuffix": ".prefetch.rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments",
+    "clientParamParsing": false,
+    "dynamicRSCPrerender": false
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

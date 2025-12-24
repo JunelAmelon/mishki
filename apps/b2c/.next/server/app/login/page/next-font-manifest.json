@@ -1,0 +1,13 @@
+{
+  "pages": {},
+  "app": {
+    "[project]/apps/b2c/app/login/page": [
+      "static/media/83afe278b6a6bb3c.p.3a6ba036.woff2",
+      "static/media/70e3db2de7f94926.p.347f98aa.woff2",
+      "static/media/2a65768255d6b625.p.d19752fb.woff2",
+      "static/media/a85fe84266768609.p.e658778d.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": false,
+  "pagesUsingSizeAdjust": false
+}

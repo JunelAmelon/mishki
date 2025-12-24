@@ -1,0 +1,21 @@
+{
+  "/(auth)/inscription/page": "/inscription",
+  "/(auth)/login/page": "/login",
+  "/(auth)/validation-attente/page": "/validation-attente",
+  "/(protected)/accueil/page": "/accueil",
+  "/(protected)/catalogue/page": "/catalogue",
+  "/(protected)/commande-rapide/page": "/commande-rapide",
+  "/(protected)/devis/page": "/devis",
+  "/(protected)/factures/page": "/factures",
+  "/(protected)/page": "/",
+  "/(protected)/panier/page": "/panier",
+  "/(protected)/protocoles/fiche/[id]/page": "/protocoles/fiche/[id]",
+  "/(protected)/protocoles/page": "/protocoles",
+  "/(protected)/protocoles/rituel/[id]/page": "/protocoles/rituel/[id]",
+  "/(protected)/reassort/page": "/reassort",
+  "/(protected)/telechargements/page": "/telechargements",
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/favicon.ico/route": "/favicon.ico",
+  "/page": "/"
+}

@@ -1,0 +1,391 @@
+================================================================================
+  MISHKI - SCÉNARIO 1 : APPLICATIONS SÉPARÉES AVEC BACKEND CENTRALISÉ
+================================================================================
+
+🌐 VUE D'ENSEMBLE SIMPLE
+================================================================================
+
+Imaginez MISHKI comme un restaurant avec DEUX ENTRÉES DIFFÉRENTES :
+
+1. ENTRÉE GRAND PUBLIC (B2C) - Pour Mme Tout-le-monde
+   - Jolie vitrine marketing
+   - Achats à l'unité
+   - Prix TTC (taxes incluses)
+   - Paiement immédiat par carte
+
+2. ENTRÉE PROFESSIONNELLE (B2B) - Pour les SPA et instituts de beauté
+   - Interface sobre, fonctionnelle
+   - Achats en gros (formats cabine)
+   - Prix HT + remises négociées
+   - Paiement sur facture à 30 jours
+
+MAIS : Les deux entrées mènent à la MÊME CUISINE (backend) et utilisent les 
+MÊMES INGRÉDIENTS (catalogue produits).
+
+
+📊 ARCHITECTURE DÉTAILLÉE
+================================================================================
+
+                              INTERNET
+                                 |
+                 +---------------+---------------+
+                 |                               |
+        +-------------------+          +-------------------+
+        | www.mishki.com    |          | pro.mishki.com    |
+        |                   |          |                   |
+        | Site B2C          |          | Portail B2B       |
+        | (apps/b2c)        |          | (apps/b2b)        |
+        |                   |          |                   |
+        | • Page d'accueil  |          | • Login obligatoire|
+        | • Catalogue       |          | • Dashboard pro   |
+        | • Blog beauté     |          | • Commande rapide |
+        | • Panier          |          | • Mes factures    |
+        | • Paiement Stripe |          | • Demande de devis|
+        | • Compte optionnel|          | • Suivi stock     |
+        +-------------------+          +-------------------+
+                 |                               |
+                 +---------------+---------------+
+                                 |
+        +-------------------------------------------------------+
+        |      PACKAGES PARTAGÉS (packages/shared)              |
+        |                                                       |
+        | 📦 types/                                             |
+        |   ├── Product.ts       ← Définition d'un produit     |
+        |   ├── User.ts          ← Définition utilisateur      |
+        |   └── Order.ts         ← Définition commande         |
+        |                                                       |
+        | 🎨 ui/                                                |
+        |   ├── Button.tsx       ← Bouton réutilisable         |
+        |   ├── Card.tsx         ← Carte produit               |
+        |   ├── Input.tsx        ← Champ de formulaire         |
+        |   └── Badge.tsx        ← Badge statut                |
+        |                                                       |
+        | 🔧 utils/                                             |
+        |   ├── formatPrice.ts   ← 45.50 → "45,50 €"          |
+        |   ├── calcTVA.ts       ← Calcul taxe                |
+        |   └── validators.ts    ← Validation email, SIRET     |
+        |                                                       |
+        | 🌐 api-client/                                        |
+        |   ├── products.ts      ← getProducts(), getById()    |
+        |   ├── auth.ts          ← login(), register()         |
+        |   └── orders.ts        ← createOrder(), getOrders()  |
+        +-------------------------------------------------------+
+                                 |
+        +-------------------------------------------------------+
+        |           BACKEND UNIQUE (Supabase)                   |
+        |                                                       |
+        | 🗄️  BASE DE DONNÉES PostgreSQL                       |
+        |                                                       |
+        | 📋 Table: products                                    |
+        | +----+--------------+---------+---------+-------+     |
+        | | id | name         |price_b2c|price_b2b| stock |     |
+        | +----+--------------+---------+---------+-------+     |
+        | | 1  | Crème Visage |  52.00  |  39.00  |  150  |     |
+        | | 2  | Sérum Anti-âge|  78.00  |  58.50  |   85  |     |
+        | | 3  | Gommage Corps|  38.00  |  28.50  |  200  |     |
+        | +----+--------------+---------+---------+-------+     |
+        |                                                       |
+        | 👤 Table: users                                       |
+        | +----+--------+------+------+----------+-------+      |
+        | | id | email  | role |siret |validated |remise |      |
+        | +----+--------+------+------+----------+-------+      |
+        | | 1  |marie@..| b2c  | null |   true   |  0%   |      |
+        | | 2  |spa@... | b2b  |12345.|   true   | 15%   |      |
+        | | 3  |pro@... | b2b  |67890.|  false   |  0%   |      |
+        | +----+--------+------+------+----------+-------+      |
+        |                                                       |
+        | 🛒 Table: orders                                      |
+        | 📄 Table: invoices (B2B uniquement)                  |
+        | 📸 Storage: product-images/                          |
+        | 📁 Storage: b2b-documents/ (KBIS, pièces ID)         |
+        |                                                       |
+        | 🔐 AUTH                                               |
+        | • Email/Password pour tous                            |
+        | • OAuth Google (B2C)                                  |
+        | • Validation manuelle admin (B2B)                     |
+        +-------------------------------------------------------+
+
+
+🎬 SCÉNARIOS D'UTILISATION
+================================================================================
+
+SCÉNARIO A : Cliente B2C - "Sophie achète une crème"
+--------------------------------------------------------------------------------
+1. Sophie va sur www.mishki.com
+2. Voit la page d'accueil marketing avec belles images
+3. Clique sur "Crème Visage Pro" → voit 52,00 € TTC
+4. Ajoute au panier (stocké dans navigateur)
+5. Crée un compte rapide (email + mot de passe)
+6. Paie par Stripe → reçoit email confirmation
+7. Backend crée une commande avec role: b2c
+
+
+SCÉNARIO B : Gérante de SPA B2B - "Marie commande 50 crèmes"
+--------------------------------------------------------------------------------
+1. Marie va sur pro.mishki.com
+2. Est redirigée vers /login (protégé)
+3. Se connecte avec ses identifiants pro
+4. Voit son dashboard : remise 15%, factures en attente
+5. Va sur "Commande Rapide"
+6. Cherche "Crème Visage Pro" → voit 39,00 € HT (au lieu de 52€)
+7. Entre quantité : 50
+8. Valide → Crée un devis (pas de paiement immédiat)
+9. Mishki admin valide → génère facture
+10. Marie paie sous 30 jours par virement
+
+
+SCÉNARIO C : Nouveau Pro - "Institut Zen s'inscrit"
+--------------------------------------------------------------------------------
+1. Institut Zen va sur pro.mishki.com/inscription
+2. Remplit formulaire :
+   - Nom société, SIRET
+   - Upload KBIS (stocké sur Supabase Storage)
+   - Upload pièce d'identité gérante
+3. Soumet inscription → validated: false en BDD
+4. Reçoit message : "En attente de validation"
+5. Admin Mishki reçoit notification
+6. Vérifie documents → clique "Valider" → validated: true
+7. Institut Zen reçoit email : "Compte activé !"
+8. Peut maintenant commander
+
+
+💎 CE QUI EST PARTAGÉ vs CE QUI EST DIFFÉRENT
+================================================================================
+
+✅ PARTAGÉ (packages/shared)
+--------------------------------------------------------------------------------
+
+// packages/shared/types/Product.ts
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price_b2c: number;      // Prix public TTC
+  price_b2b: number;      // Prix pro HT
+  category: string;
+  stock: number;
+  image_url: string;
+  format_cabin?: string;  // Ex: "500ml format cabine"
+}
+
+// packages/shared/ui/Button.tsx
+export function Button({ children, variant = 'primary' }) {
+  // Bouton utilisé dans B2C ET B2B
+  // Juste les couleurs changent selon le thème
+}
+
+// packages/shared/utils/formatPrice.ts
+export function formatPrice(price: number, isB2B: boolean) {
+  if (isB2B) {
+    return `${price.toFixed(2)} € HT`;
+  }
+  return `${price.toFixed(2)} €`;
+}
+
+// packages/shared/api-client/products.ts
+export async function getProducts(userRole: 'b2c' | 'b2b') {
+  const { data } = await supabase
+    .from('products')
+    .select('*');
+  
+  // Retourne les prix adaptés au rôle
+  return data.map(p => ({
+    ...p,
+    price: userRole === 'b2b' ? p.price_b2b : p.price_b2c
+  }));
+}
+
+
+❌ DIFFÉRENT (propre à chaque app)
+--------------------------------------------------------------------------------
+
+B2C uniquement :
+- Page blog beauté
+- Rituels de soins
+- Newsletter
+- Paiement Stripe intégré
+- Design coloré, émotionnel
+
+B2B uniquement :
+- Dashboard avec stats
+- Commande rapide (CSV upload)
+- Gestion factures
+- Demande de devis
+- Téléchargement fiches techniques
+- Design sobre, professionnel
+
+
+🔑 AVANTAGES DE CETTE ARCHITECTURE
+================================================================================
+
+1. 🔒 Sécurité : B2B isolé, impossible d'accéder sans login validé
+2. 💰 Prix différenciés : Même produit, 2 prix selon le client
+3. 🎨 UX optimisée : Design adapté à chaque audience
+4. 📊 Analytics séparés : Suivi B2C vs B2B
+5. 🚀 Deploy indépendant : Mise à jour B2C sans toucher B2B
+6. ♻️ Code réutilisé : Composants/logique partagés = moins de bugs
+7. 📈 Évolutivité : Facile d'ajouter un 3ème site (B2B2C, Marketplace...)
+
+
+🛠️ TECHNOLOGIES PROPOSÉES
+================================================================================
+
+Frontend (B2C + B2B)
+├── Next.js 16 (déjà en place ✅)
+├── TailwindCSS (déjà en place ✅)
+└── React 19 (déjà en place ✅)
+
+Backend
+├── Supabase (recommandé) OU Firebase OU API custom
+│   ├── PostgreSQL (base de données)
+│   ├── Auth (gestion utilisateurs)
+│   ├── Storage (images + documents)
+│   └── Edge Functions (logique métier)
+
+Packages partagés
+├── TypeScript (types communs)
+├── Zod (validation)
+└── Radix UI (composants accessibles)
+
+Paiement
+├── Stripe (B2C - paiement direct)
+└── Factures PDF (B2B - paiement différé)
+
+
+📝 EN RÉSUMÉ POUR UN NON-TECHNIQUE
+================================================================================
+
+Ce que ça veut dire :
+
+Vous avez 2 SITES WEB SÉPARÉS (comme 2 boutiques différentes) :
+- Un pour les CLIENTS NORMAUX (joli, facile, paiement rapide)
+- Un pour les PROFESSIONNELS (sérieux, prix réduits, facturation)
+
+Mais DERRIÈRE :
+- Ils utilisent le MÊME STOCK de produits
+- Ils se CONNECTENT À LA MÊME BASE DE DONNÉES
+- Ils PARTAGENT DES MORCEAUX DE CODE (pour éviter de tout coder 2 fois)
+
+AVANTAGE PRINCIPAL : 
+Un produit ajouté au catalogue apparaît AUTOMATIQUEMENT dans B2C ET B2B, 
+mais avec des prix différents.
+
+
+🔗 NAVIGATION ENTRE B2C ET B2B
+================================================================================
+
+OPTION 1 : Lien dans le footer/header (Le plus simple)
+--------------------------------------------------------------------------------
+www.mishki.com
+├── Header
+│   └── "Espace Pro" → redirige vers pro.mishki.com
+└── Footer
+    └── "Vous êtes professionnel ?" → pro.mishki.com
+
+Avantages :
+✅ Simple à implémenter
+✅ Deux sites restent distincts
+✅ SEO optimal pour chaque audience
+
+
+OPTION 2 : Route /pro dans le même site (Architecture unifiée)
+--------------------------------------------------------------------------------
+www.mishki.com
+├── / (B2C - public)
+├── /produits (B2C)
+├── /blog (B2C)
+└── /pro (B2B - protégé)
+    ├── /pro/login
+    ├── /pro/dashboard
+    ├── /pro/catalogue
+    └── /pro/factures
+
+Avantages :
+✅ Un seul domaine
+✅ Navigation fluide
+✅ Partage de session (si connecté B2C, peut accéder B2B)
+
+Inconvénients :
+❌ Bundle plus lourd (code B2B chargé même pour B2C)
+❌ Moins flexible pour les déploiements séparés
+
+
+OPTION 3 : Bouton "Passer en mode Pro" avec SSO (⭐ RECOMMANDÉ)
+--------------------------------------------------------------------------------
+www.mishki.com (B2C)
+└── Header
+    └── 🏢 "Espace Professionnel"
+        ├── Si non connecté → Modal login avec lien "Créer compte pro"
+        └── Si connecté B2B → Redirige vers pro.mishki.com (déjà auth)
+
+Comment ça marche :
+1. Client clique "Espace Pro" sur mishki.com
+2. S'il n'est pas connecté → affiche modal de login
+3. Login réussi → redirige vers pro.mishki.com avec token partagé
+4. Le site pro le reconnait automatiquement (SSO - Single Sign-On)
+
+Avantages :
+✅ Meilleur des deux mondes
+✅ Sites séparés mais accès fluide
+✅ SSO - connexion partagée entre B2C et B2B
+
+
+IMPLÉMENTATION RECOMMANDÉE
+--------------------------------------------------------------------------------
+
+Dans le B2C (apps/b2c) :
+
+1. Header avec lien Pro :
+   
+   <nav>
+     <Link href="/">Accueil</Link>
+     <Link href="/produits">Produits</Link>
+     <Link href="/blog">Blog</Link>
+     
+     <div className="ml-auto flex gap-4">
+       <Link href="https://pro.mishki.com">
+         🏢 Espace Professionnel
+       </Link>
+     </div>
+   </nav>
+
+
+2. Bannière pour pros dans le footer :
+   
+   <div className="bg-[#235730] text-white p-6 text-center">
+     <h3>Vous êtes professionnel(le) ?</h3>
+     <p>Spa, institut, salon : accédez à nos tarifs pros</p>
+     <Button href="https://pro.mishki.com">
+       Découvrir l'espace pro
+     </Button>
+   </div>
+
+
+3. Page dédiée /devenir-professionnel :
+   
+   www.mishki.com/devenir-professionnel
+   → Explique les avantages B2B
+   → Formulaire d'inscription
+   → Bouton "Accéder à mon espace" (si déjà inscrit)
+
+
+SSO (Connexion partagée) - Flux technique
+--------------------------------------------------------------------------------
+
+1. User se connecte sur mishki.com (B2C)
+2. Token JWT stocké dans cookie partagé (*.mishki.com)
+3. Clique "Espace Pro" → redirige vers pro.mishki.com
+4. pro.mishki.com lit le même cookie
+5. Si role = b2b et validated = true → accès direct au dashboard
+6. Sinon → message "Accès réservé aux professionnels validés"
+
+Sécurité :
+- Cookie httpOnly + secure + sameSite=lax
+- Token expiré après 7 jours
+- Refresh token pour renouvellement automatique
+
+
+================================================================================
+Document créé le 16/12/2025
+Projet : Mishki Monorepo
+================================================================================

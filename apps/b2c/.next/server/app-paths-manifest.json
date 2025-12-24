@@ -1,0 +1,21 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/a-propos/page": "app/a-propos/page.js",
+  "/blog/[id]/page": "app/blog/[id]/page.js",
+  "/blog/page": "app/blog/page.js",
+  "/conditions/page": "app/conditions/page.js",
+  "/confidentialite/page": "app/confidentialite/page.js",
+  "/contact/page": "app/contact/page.js",
+  "/engagement/page": "app/engagement/page.js",
+  "/livraison/page": "app/livraison/page.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js",
+  "/paiement/page": "app/paiement/page.js",
+  "/panier/page": "app/panier/page.js",
+  "/podcast/page": "app/podcast/page.js",
+  "/produits/[id]/page": "app/produits/[id]/page.js",
+  "/produits/page": "app/produits/page.js",
+  "/rituels/[id]/page": "app/rituels/[id]/page.js",
+  "/rituels/page": "app/rituels/page.js"
+}

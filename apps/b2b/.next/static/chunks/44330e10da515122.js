@@ -1,0 +1,7 @@
+__turbopack_load_page_chunks__("/RituelCabine", [
+  "static/chunks/402a484a3e0aa40a.js",
+  "static/chunks/64f5f779a8c56a1a.js",
+  "static/chunks/4cec7f68b5ce9dbd.js",
+  "static/chunks/2c5edc8d52cee6ac.js",
+  "static/chunks/turbopack-4dd595584510c153.js"
+])

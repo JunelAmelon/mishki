@@ -1,0 +1,3 @@
+{
+  "/(auth)/validation-attente/page": "app/(auth)/validation-attente/page.js"
+}
