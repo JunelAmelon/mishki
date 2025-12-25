@@ -897,6 +897,7 @@
         "rituals": {
             "title": "Nos Rituels",
             "subtitle": "Découvrez nos rituels de beauté inspirés des traditions péruviennes pour une peau rayonnante",
+            "loading": "Chargement...",
             "back": "Retour",
             "heading": "Rituels de Beauté",
             "duration": "Durée",
@@ -1041,6 +1042,7 @@
         "blog": {
             "title": "Notre Blog",
             "subtitle": "Conseils beauté, rituels ancestraux et secrets de la nature péruvienne",
+            "loading": "Chargement...",
             "back": "Retour",
             "heading": "Articles",
             "read_more": "Lire la suite",
@@ -1080,6 +1082,7 @@
         "podcast": {
             "title": "Notre Podcast",
             "subtitle": "Écoutez nos experts partager leurs connaissances sur la beauté naturelle et le bien-être",
+            "loading": "Chargement...",
             "back": "Retour",
             "heading": "Épisodes",
             "info": {

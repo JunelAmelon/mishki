@@ -897,6 +897,7 @@
         "rituals": {
             "title": "Nuestros Rituales",
             "subtitle": "Descubra nuestros rituales de belleza inspirados en las tradiciones peruanas para una piel radiante",
+            "loading": "Cargando...",
             "back": "Volver",
             "heading": "Rituales de Belleza",
             "duration": "Duración",
@@ -1041,6 +1042,7 @@
         "blog": {
             "title": "Nuestro Blog",
             "subtitle": "Consejos de belleza, rituales ancestrales y secretos de la naturaleza peruana",
+            "loading": "Cargando...",
             "back": "Volver",
             "heading": "Artículos",
             "read_more": "Leer más",
@@ -1080,6 +1082,7 @@
         "podcast": {
             "title": "Nuestro Podcast",
             "subtitle": "Escuche a nuestros expertos compartiendo sus conocimientos sobre belleza natural y bienestar",
+            "loading": "Cargando...",
             "back": "Volver",
             "heading": "Episodios",
             "info": {
