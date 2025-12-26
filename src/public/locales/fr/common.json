@@ -185,7 +185,13 @@
             "results_count": "{count, plural, =0 {Aucun produit trouvé} =1 {1 produit trouvé} other {# produits trouvés}}",
             "add_to_cart": "Ajouter au panier",
             "added_to_cart": "Ajouté au panier",
+            "cancel": "Annuler",
+            "confirm": "Confirmer",
             "in_stock": "{count} en stock",
+            "stock": {
+                "label": "Stock : {count}",
+                "out": "Rupture"
+            },
             "no_results": "Aucun produit trouvé",
             "no_results_desc": "Essayez de modifier vos filtres de recherche",
             "reset_filters": "Réinitialiser les filtres",
@@ -203,6 +209,7 @@
         "protocoles": {
             "title": "Protocoles & Rituels",
             "subtitle": "Fiches techniques détaillées et rituels cabine professionnels",
+            "loading": "Chargement...",
             "search_placeholder": "Rechercher un protocole...",
             "filter_all_types": "Tous les types",
             "filter_all_cats": "Toutes catégories",
@@ -248,6 +255,7 @@
         "quick_order": {
             "title": "Commande Rapide",
             "subtitle": "Commandez directement par référence produit pour un gain de temps maximal",
+            "loading": "Chargement...",
             "common_refs": "Références courantes :",
             "form_title": "Saisie de commande",
             "table": {
@@ -295,7 +303,8 @@
                     "description_placeholder": "Décrivez votre projet, vos besoins spécifiques, vos contraintes...",
                     "qty_label": "Quantité estimée (unités)",
                     "budget_label": "Budget estimé (€ HT)",
-                    "date_label": "Date souhaitée"
+                    "date_label": "Date souhaitée",
+                    "date_placeholder": "Choisir une date"
                 },
                 "products": {
                     "title": "Produits souhaités (optionnel)",
@@ -329,6 +338,7 @@
         "invoices": {
             "title": "Factures Professionnelles",
             "subtitle": "Consultez et téléchargez vos factures en quelques clics",
+            "loading": "Chargement...",
             "btn_download_all": "Télécharger tout",
             "stats": {
                 "total_ht": "Total HT (année)",
@@ -399,6 +409,7 @@
         "auto_reassort": {
             "title": "Réassort Automatique",
             "subtitle": "Configurez le réapprovisionnement automatique de vos produits essentiels",
+            "loading": "Chargement...",
             "btn_new": "Nouveau réassort",
             "stats": {
                 "active": "Réassorts actifs",
@@ -634,7 +645,9 @@
             "products": {
                 "title": "Nouveautés",
                 "add_to_cart": "Ajouter au panier",
-                "loading": "Chargement..."
+                "loading": "Chargement...",
+                "stock_left": "Stock : {count}",
+                "stock_out": "Rupture"
             },
             "reviews": {
                 "title": "Avis de nos clients",
@@ -960,6 +973,7 @@
         "rituals": {
             "title": "Nos Rituels",
             "subtitle": "Découvrez nos rituels de beauté inspirés des traditions péruviennes pour une peau rayonnante",
+            "loading": "Chargement...",
             "back": "Retour",
             "heading": "Rituels de Beauté",
             "duration": "Durée",
@@ -1104,6 +1118,7 @@
         "blog": {
             "title": "Notre Blog",
             "subtitle": "Conseils beauté, rituels ancestraux et secrets de la nature péruvienne",
+            "loading": "Chargement...",
             "back": "Retour",
             "heading": "Articles",
             "read_more": "Lire la suite",
@@ -1143,6 +1158,7 @@
         "podcast": {
             "title": "Notre Podcast",
             "subtitle": "Écoutez nos experts partager leurs connaissances sur la beauté naturelle et le bien-être",
+            "loading": "Chargement...",
             "back": "Retour",
             "heading": "Épisodes",
             "info": {

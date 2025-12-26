@@ -1,7 +1,7 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { adminDb } from '@mishki/firebase/admin';
+import { adminDb, adminAuth } from '@mishki/firebase/admin';
 import fr from '@/public/locales/fr/common.json';
 
 const ENABLE_SEED = process.env.NEXT_PUBLIC_ENABLE_SEED === 'true';
@@ -821,6 +821,88 @@ function buildPodcasts(): Podcast[] {
   });
 }
 
+async function createTestUsers() {
+  if (!adminAuth) {
+    throw new Error('Admin Auth not configured');
+  }
+
+  const users = [
+    {
+      email: 'client@mishki.com',
+      password: 'ClientMishki2025!',
+      role: 'b2c',
+      displayName: 'Client Test B2C',
+    },
+    {
+      email: 'pro@mishki.com',
+      password: 'ProMishki2025!',
+      role: 'b2b',
+      displayName: 'Professionnel Test B2B',
+    },
+  ];
+
+  const createdUsers = [];
+
+  for (const userData of users) {
+    try {
+      // Vérifier si l'utilisateur existe déjà
+      let userRecord;
+      try {
+        userRecord = await adminAuth.getUserByEmail(userData.email);
+        console.log(`User ${userData.email} already exists, skipping creation`);
+      } catch (error: any) {
+        if (error.code === 'auth/user-not-found') {
+          // Créer l'utilisateur dans Firebase Auth
+          userRecord = await adminAuth.createUser({
+            email: userData.email,
+            password: userData.password,
+            displayName: userData.displayName,
+            emailVerified: true,
+          });
+          console.log(`Created user: ${userData.email} with UID: ${userRecord.uid}`);
+        } else {
+          throw error;
+        }
+      }
+
+      // Créer/mettre à jour le document dans Firestore
+      if (userRecord) {
+        const userDoc: any = {
+          email: userData.email,
+          role: userData.role,
+          displayName: userData.displayName,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        // Ajouter des champs spécifiques pour le B2B
+        if (userData.role === 'b2b') {
+          userDoc.validated = true; // Compte validé automatiquement pour les tests
+          userDoc.remise = 15; // Remise pro de 15%
+          userDoc.societe = 'Société Test B2B';
+          userDoc.siret = '12345678901234';
+          userDoc.nom = 'Test';
+          userDoc.prenom = 'Pro';
+        }
+
+        await adminDb?.collection('users').doc(userRecord.uid).set(userDoc, { merge: true });
+        console.log(`Created/updated Firestore document for ${userData.email}`);
+
+        createdUsers.push({
+          uid: userRecord.uid,
+          email: userData.email,
+          role: userData.role,
+        });
+      }
+    } catch (error: any) {
+      console.error(`Error creating user ${userData.email}:`, error.message);
+      // Continue avec les autres utilisateurs même en cas d'erreur
+    }
+  }
+
+  return createdUsers;
+}
+
 export async function POST() {
   if (!ENABLE_SEED) {
     return NextResponse.json({ ok: false, error: 'Seed disabled' }, { status: 403 });
@@ -831,6 +913,11 @@ export async function POST() {
     if (!db) {
       return NextResponse.json({ ok: false, error: 'Admin not configured' }, { status: 500 });
     }
+
+    // Créer les utilisateurs de test
+    console.log('Creating test users...');
+    const testUsers = await createTestUsers();
+    console.log(`Created ${testUsers.length} test users`);
 
     const batch = db.batch();
     const b2bData = buildProtocolesB2B();
@@ -948,7 +1035,11 @@ export async function POST() {
     }
 
     await batch.commit();
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ 
+      ok: true, 
+      message: 'Seed completed successfully',
+      users: testUsers,
+    });
   } catch (error: unknown) {
     console.error('Seed error', error);
     const message = error instanceof Error ? error.message : 'Unknown error';

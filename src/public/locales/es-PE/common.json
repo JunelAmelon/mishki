@@ -177,7 +177,13 @@
             "results_count": "{count, plural, =0 {No se encontraron productos} =1 {1 producto encontrado} other {# productos encontrados}}",
             "add_to_cart": "Añadir al carrito",
             "added_to_cart": "Añadido al carrito",
+            "cancel": "Cancelar",
+            "confirm": "Confirmar",
             "in_stock": "{count} en stock",
+            "stock": {
+                "label": "Stock: {count}",
+                "out": "Agotado"
+            },
             "no_results": "No se encontraron productos",
             "no_results_desc": "Intente modificar sus filtros de búsqueda",
             "reset_filters": "Restablecer filtros",
@@ -195,6 +201,7 @@
         "protocoles": {
             "title": "Protocolos y Rituales",
             "subtitle": "Fichas técnicas detalladas y rituales de cabina profesionales",
+            "loading": "Cargando...",
             "search_placeholder": "Buscar un protocolo...",
             "filter_all_types": "Todos los tipos",
             "filter_all_cats": "Todas las categorías",
@@ -240,6 +247,7 @@
         "quick_order": {
             "title": "Pedido Rápido",
             "subtitle": "Pida directamente por referencia de producto para un ahorro máximo de tiempo",
+            "loading": "Cargando...",
             "common_refs": "Referencias comunes:",
             "form_title": "Entrada de pedido",
             "table": {
@@ -287,7 +295,8 @@
                     "description_placeholder": "Describa su proyecto, necesidades específicas, limitaciones...",
                     "qty_label": "Cantidad estimada (unidades)",
                     "budget_label": "Presupuesto estimado (€ sin IVA)",
-                    "date_label": "Fecha solicitada"
+                    "date_label": "Fecha solicitada",
+                    "date_placeholder": "Elegir una fecha"
                 },
                 "products": {
                     "title": "Productos deseados (opcional)",
@@ -321,6 +330,7 @@
         "invoices": {
             "title": "Facturas Profesionales",
             "subtitle": "Consulte y descargue sus facturas en unos pocos clics",
+            "loading": "Cargando...",
             "btn_download_all": "Descargar todas",
             "stats": {
                 "total_ht": "Total sin IVA (año)",
@@ -390,7 +400,8 @@
         },
         "auto_reassort": {
             "title": "Reabastecimiento Automático",
-            "subtitle": "Configura el reabastecimiento automático de tus productos esenciales",
+            "subtitle": "Configure el reabastecimiento automático de sus productos esenciales",
+            "loading": "Cargando...",
             "btn_new": "Nuevo reabastecimiento",
             "stats": {
                 "active": "Reabastecimientos activos",
@@ -586,7 +597,9 @@
             "products": {
                 "title": "Novedades",
                 "add_to_cart": "Añadir al carrito",
-                "loading": "Cargando..."
+                "loading": "Cargando...",
+                "stock_left": "Stock: {count}",
+                "stock_out": "Agotado"
             },
             "reviews": {
                 "title": "Opiniones de clientes",
@@ -910,6 +923,7 @@
         "rituals": {
             "title": "Nuestros Rituales",
             "subtitle": "Descubra nuestros rituales de belleza inspirados en las tradiciones peruanas para una piel radiante",
+            "loading": "Cargando...",
             "back": "Volver",
             "heading": "Rituales de Belleza",
             "duration": "Duración",
@@ -1054,6 +1068,7 @@
         "blog": {
             "title": "Nuestro Blog",
             "subtitle": "Consejos de belleza, rituales ancestrales y secretos de la naturaleza peruana",
+            "loading": "Cargando...",
             "back": "Volver",
             "heading": "Artículos",
             "read_more": "Leer más",
@@ -1093,6 +1108,7 @@
         "podcast": {
             "title": "Nuestro Podcast",
             "subtitle": "Escuche a nuestros expertos compartiendo sus conocimientos sobre belleza natural y bienestar",
+            "loading": "Cargando...",
             "back": "Volver",
             "heading": "Episodios",
             "info": {

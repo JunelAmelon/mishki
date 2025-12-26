@@ -177,7 +177,13 @@
             "results_count": "{count, plural, =0 {No products found} =1 {1 product found} other {# products found}}",
             "add_to_cart": "Add to cart",
             "added_to_cart": "Added to cart",
+            "cancel": "Cancel",
+            "confirm": "Confirm",
             "in_stock": "{count} in stock",
+            "stock": {
+                "label": "Stock: {count}",
+                "out": "Out of stock"
+            },
             "no_results": "No products found",
             "no_results_desc": "Try modifying your search filters",
             "reset_filters": "Reset filters",
@@ -195,6 +201,7 @@
         "protocoles": {
             "title": "Protocols & Rituals",
             "subtitle": "Detailed technical data sheets and professional treatment room rituals",
+            "loading": "Loading...",
             "search_placeholder": "Search for a protocol...",
             "filter_all_types": "All types",
             "filter_all_cats": "All categories",
@@ -240,6 +247,7 @@
         "quick_order": {
             "title": "Quick Order",
             "subtitle": "Order directly by product reference for maximum time savings",
+            "loading": "Loading...",
             "common_refs": "Common references:",
             "form_title": "Order entry",
             "table": {
@@ -287,7 +295,8 @@
                     "description_placeholder": "Describe your project, specific needs, constraints...",
                     "qty_label": "Estimated quantity (units)",
                     "budget_label": "Estimated budget (€ excl. tax)",
-                    "date_label": "Desired date"
+                    "date_label": "Desired date",
+                    "date_placeholder": "Choose a date"
                 },
                 "products": {
                     "title": "Desired products (optional)",
@@ -321,6 +330,7 @@
         "invoices": {
             "title": "Professional Invoices",
             "subtitle": "View and download your invoices in a few clicks",
+            "loading": "Loading...",
             "btn_download_all": "Download all",
             "stats": {
                 "total_ht": "Total excl. tax (year)",
@@ -389,9 +399,10 @@
             }
         },
         "auto_reassort": {
-            "title": "Automatic Restocking",
-            "subtitle": "Set up automatic replenishment of your essential products",
-            "btn_new": "New restock",
+            "title": "Auto-Replenishment",
+            "subtitle": "Configure automatic replenishment of your essential products",
+            "loading": "Loading...",
+            "btn_new": "New replenishment",
             "stats": {
                 "active": "Active replenishments",
                 "monitored": "Monitored products",
@@ -610,7 +621,9 @@
             "products": {
                 "title": "New Arrivals",
                 "add_to_cart": "Add to cart",
-                "loading": "Loading..."
+                "loading": "Loading...",
+                "stock_left": "Stock: {count}",
+                "stock_out": "Out of stock"
             },
             "reviews": {
                 "title": "Customer Reviews",
@@ -934,6 +947,7 @@
         "rituals": {
             "title": "Our Rituals",
             "subtitle": "Discover our beauty rituals inspired by Peruvian traditions for radiant skin",
+            "loading": "Loading...",
             "back": "Back",
             "heading": "Beauty Rituals",
             "duration": "Duration",
@@ -1078,6 +1092,7 @@
         "blog": {
             "title": "Our Blog",
             "subtitle": "Beauty tips, ancestral rituals, and secrets of Peruvian nature",
+            "loading": "Loading...",
             "back": "Back",
             "heading": "Articles",
             "read_more": "Read more",
@@ -1117,6 +1132,7 @@
         "podcast": {
             "title": "Our Podcast",
             "subtitle": "Listen to our experts share their knowledge on natural beauty and well-being",
+            "loading": "Loading...",
             "back": "Back",
             "heading": "Episodes",
             "info": {
