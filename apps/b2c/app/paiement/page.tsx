@@ -44,6 +44,8 @@ export default function PaymentPage() {
   >([])
   const [totalsSnapshot, setTotalsSnapshot] = useState<{ subtotal: number; tax: number; total: number; currency: string } | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [clearedAfterPay, setClearedAfterPay] = useState(false)
 
   const [formData, setFormData] = useState({
     address: '',
@@ -62,6 +64,7 @@ export default function PaymentPage() {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       setUserId(user?.uid ?? null)
+      setUserEmail(user?.email ?? null)
       if (user?.uid) {
         try {
           const snap = await getDoc(doc(db, 'users', user.uid))
@@ -111,7 +114,7 @@ export default function PaymentPage() {
     [locale]
   )
 
-  const cartTotal = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const cartTotal = clearedAfterPay ? 0 : selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const userRegion = useMemo(() => {
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone?.toLowerCase()
@@ -241,6 +244,58 @@ export default function PaymentPage() {
       setOrderLinesSnapshot(linesSnapshot)
       setTotalsSnapshot(totals)
       setShowConfirmation(true)
+      setClearedAfterPay(true)
+
+      // Envoi email facture (best-effort)
+      try {
+        const buyerAddress = addressMode === 'saved' ? selectedSavedAddress : formData.address
+        const buyerName = [savedProfile?.firstName, savedProfile?.lastName].filter(Boolean).join(' ') || 'Client B2C'
+        const buyerPhone = formData.phone || savedProfile?.phone || undefined
+        const invoiceData: InvoiceData = {
+          locale: userRegion,
+          invoiceNumber: `INV-${id.slice(0, 8)}`,
+          orderNumber: id,
+          issueDate: new Date().toLocaleDateString('fr-FR'),
+          buyer: {
+            name: buyerName,
+            addressLines: [buyerAddress || 'Adresse client', formData.city || '', formData.postalCode || ''].filter(Boolean),
+            phone: buyerPhone,
+            email: userEmail || undefined,
+          },
+          seller: {
+            name: 'MISHKI LAB',
+            addressLines: ['5 Rue du Printemps', '88000 Jeuxey', 'France'],
+            siret: '92089652300011',
+            ape: '2042Z',
+            email: 'facturation@mishki.com',
+          },
+          payment: { terms: provider === 'paypal' ? 'Paiement en ligne (PayPal)' : 'Paiement en ligne (carte)' },
+          lines: linesSnapshot.map((l) => ({
+            qty: l.quantity,
+            unit: 'pcs',
+            code: l.slug,
+            description: l.name,
+            unitPrice: round2(l.priceTTC / (1 + taxRate)),
+          })),
+          totals: {
+            subtotal: totals.subtotal,
+            taxLabel: userRegion === 'pe' ? 'IGV 18%' : 'TVA 20%',
+            taxAmount: totals.tax,
+            total: totals.total,
+            currency: totals.currency === 'EUR' ? 'EUR' : 'EUR',
+          },
+        }
+        if (userEmail) {
+          void fetch('/api/invoice-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: userEmail, invoiceData }),
+          }).catch((err) => console.error('invoice-email (b2c) failed', err))
+        }
+      } catch (e) {
+        console.error('invoice-email (b2c) build/send failed', e)
+      }
+
       // on ne retire que les articles payés
       const paidIds = linesSnapshot.map((l) => l.slug).filter(Boolean) as string[]
       if (paidIds.length) {

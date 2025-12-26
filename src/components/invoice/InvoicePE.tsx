@@ -61,6 +61,7 @@ export default function InvoicePE({ data }: { data: InvoiceData }) {
             <View style={[styles.metaBox, { alignSelf: 'stretch' }]}>
               <Text style={styles.bold}>Señor(es)</Text>
               <Text>{buyer.name}</Text>
+              {buyer.company && <Text>{buyer.company}</Text>}
               {buyer.ruc && <Text>RUC: {buyer.ruc}</Text>}
               {buyer.addressLines.map((l: string, i: number) => (
                 <Text key={i}>{l}</Text>

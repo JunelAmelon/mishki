@@ -48,6 +48,7 @@ export default function InvoiceFR({ data }: { data: InvoiceData }) {
             </View>
             <View style={[styles.metaBox, { alignSelf: 'stretch', marginTop: 4 }]}>
               <Text style={styles.label}>{buyer.name}</Text>
+              {buyer.company && <Text>{buyer.company}</Text>}
               {buyer.addressLines.map((l: string, i: number) => (
                 <Text key={i}>{l}</Text>
               ))}

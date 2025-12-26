@@ -74,18 +74,11 @@
             "register": {
                 "title": "Professional Registration",
                 "subtitle": "Create your B2B account with exclusive tax-exclusive pricing and discounts",
-                "title_b2c": "Create my Mishki account",
-                "subtitle_b2c": "Join the Mishki community and enjoy exclusive offers",
                 "sections": {
                     "personal": "Personal information",
                     "connection": "Login information",
                     "company": "Company information",
-                    "documents": "Documents",
-                    "address": "Contact details"
-                },
-                "tabs": {
-                    "b2c": "Customer account",
-                    "b2b": "Professional account"
+                    "documents": "Documents"
                 },
                 "fields": {
                     "first_name": "First Name *",
@@ -136,7 +129,6 @@
                 "cgv": "terms and conditions of sale",
                 "privacy": "privacy policy",
                 "btn_submit": "Create my professional account",
-                "btn_submit_b2c": "Create my account",
                 "btn_submitting": "Registration in progress...",
                 "btn_cancel": "Cancel",
                 "footer_info": "Your account will be validated within 24-48 hours after verification of your documents",
@@ -397,9 +389,9 @@
             }
         },
         "auto_reassort": {
-            "title": "Auto-Replenishment",
-            "subtitle": "Configure automatic replenishment of your essential products",
-            "btn_new": "New replenishment",
+            "title": "Automatic Restocking",
+            "subtitle": "Set up automatic replenishment of your essential products",
+            "btn_new": "New restock",
             "stats": {
                 "active": "Active replenishments",
                 "monitored": "Monitored products",
@@ -442,14 +434,61 @@
                 "tip2_title": "📊 Optimization",
                 "tip2_desc": "Avoid stockouts and optimize your cash flow",
                 "tip3_title": "🔔 Notifications",
-                "tip3_desc": "Receive alerts before each scheduled replenishment"
+                "tip3_desc": "Receive alerts before each scheduled restock"
+            }
+        },
+        "payment": {
+            "title": "Payment",
+            "subtitle": "Validate your B2B order",
+            "orderSummary": {
+                "title": "Order summary",
+                "discount": "Professional discount applied:",
+                "empty": "No items in your order.",
+                "ref": "Ref: {ref}",
+                "qty": "Quantity: {qty}",
+                "ht": "excl. VAT",
+                "total": "Total: {amount}"
+            },
+            "shipping": {
+                "title": "Shipping address",
+                "useSaved": "Use saved address",
+                "newAddress": "Enter a new address",
+                "noSaved": "No saved address.",
+                "contact": "Contact",
+                "contactPlaceholder": "Contact name",
+                "address": "Address",
+                "addressPlaceholder": "Full address",
+                "postalCode": "Postal code",
+                "postalCodePlaceholder": "75001",
+                "city": "City",
+                "cityPlaceholder": "Paris",
+                "phone": "Phone",
+                "phonePlaceholder": "+33 6 ...",
+                "deliveryMode": "Delivery method",
+                "deliveryRelay": "Pickup point",
+                "deliveryHome": "Home delivery"
+            },
+            "payment": {
+                "title": "Payment",
+                "paypalLabel": "PayPal (pro) – amount incl. VAT: {amount}",
+                "processing": "Processing...",
+                "cardCta": "Pay by card (simulation)"
+            },
+            "summary": {
+                "title": "Summary",
+                "subtotal": "Subtotal {ht}",
+                "tax": "VAT (20%)",
+                "total": "Total incl. VAT",
+                "badgeSecure": "Secure payment",
+                "badgeShipping": "Tracked shipping",
+                "badgeSupport": "Dedicated pro support"
             }
         },
         "layout": {
             "sidebar": {
                 "nav": {
                     "home": "Pro Home",
-                    "catalogue": "Catalog",
+                    "catalogue": "Catalogue",
                     "cart": "My Cart",
                     "quick_order": "Quick Order",
                     "protocoles": "Protocols",
@@ -876,8 +915,6 @@
                 "payment": {
                     "title": "Payment info",
                     "use_saved": "Use your saved card",
-                    "card_option": "Pay by card",
-                    "paypal_option": "Pay with PayPal",
                     "card_name_label": "Name on card",
                     "card_name_placeholder": "John Smith",
                     "card_number_label": "Card number",

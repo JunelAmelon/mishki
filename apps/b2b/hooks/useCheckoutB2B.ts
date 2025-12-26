@@ -29,6 +29,15 @@ type Totals = {
   currency: string;
 };
 
+type ShippingInfoB2B = {
+  address?: string | null;
+  city?: string | null;
+  postalCode?: string | null;
+  phone?: string | null;
+  contactName?: string | null;
+  deliveryType?: string | null;
+};
+
 type CreateOrderAndPaymentParams = {
   user?: B2BUser | null;
   lines: CheckoutLine[];
@@ -36,11 +45,12 @@ type CreateOrderAndPaymentParams = {
   paymentProvider: 'paypal' | 'card';
   paymentId?: string | null;
   status?: 'payee' | 'en_attente' | 'retard';
+  shipping?: ShippingInfoB2B;
 };
 
 export function useCheckoutB2B() {
   const createOrderAndPayment = useCallback(
-    async ({ user, lines, totals, paymentProvider, paymentId = null, status = 'payee' }: CreateOrderAndPaymentParams) => {
+    async ({ user, lines, totals, paymentProvider, paymentId = null, status = 'payee', shipping }: CreateOrderAndPaymentParams) => {
       // Vérifier stock et décrémenter via transaction
       await runTransaction(db, async (trx) => {
         // Lire tous les stocks avant toute écriture (contrainte Firestore transactions).
@@ -95,6 +105,7 @@ export function useCheckoutB2B() {
         paymentStatus: status,
         paymentProvider,
         paymentId,
+        shipping: shipping ?? null,
       });
 
       await addDoc(collection(db, 'payments'), {
@@ -108,6 +119,7 @@ export function useCheckoutB2B() {
         provider: paymentProvider,
         paymentId,
         createdAt: serverTimestamp(),
+        shipping: shipping ?? null,
       });
 
       return orderDoc.id;

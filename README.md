@@ -1,160 +1,165 @@
-<div align="center">
+# Bible du Projet Mishki
 
-# Mishki App (B2C & B2B)
+> **Objectif de ce document** : Fournir une compréhension totale et exhaustive du projet Mishki (architecture, base de données, logique métier) sans avoir besoin d'ouvrir le code source.
 
-Next.js (App Router) multi-app with Firebase auth/Firestore, i18n (next-intl), Tailwind UI, and seeded demo data for retail (B2C) and pro (B2B).
+---
 
-</div>
+## 🏗️ Architecture Globale
 
-## Sommaire
-- [Architecture](#architecture)
-- [Démarrage](#démarrage)
-- [Structure des apps](#structure-des-apps)
-- [Auth & accès](#auth--accès)
-- [Hooks principaux](#hooks-principaux)
-- [Pages clés](#pages-clés)
-- [Modèle de données Firestore](#modèle-de-données-firestore)
-- [Seeder](#seeder)
-- [i18n](#i18n)
-- [Règles panier](#règles-panier)
-- [Notes dev](#notes-dev)
-- [Changements récents](#changements-récents)
+Le projet est un **Monolithe Modulaire** basé sur le framework **Next.js 16+ (App Router)**.
+Il héberge deux applications distinctes au sein du même codebase :
 
-## Architecture
-- **Framework** : Next.js (App Router).
-- **Apps** : `apps/b2c` (retail), `apps/b2b` (pro, routes protégées).
-- **Firebase** : auth + Firestore (`packages/firebase` expose `db`, `auth`, helpers).
-- **UI** : Tailwind CSS.
-- **i18n** : `next-intl`.
+1.  **Mishki Retail (B2C)** : La boutique e-commerce grand public.
+2.  **Mishki Pro (B2B)** : L'espace revendeur pour les professionnels (instituts, spas).
 
-## Démarrage
-```bash
-npm install
-npm run dev
-# build + start
-npm run build && npm run start
+### Technologies Clés
+*   **Frontend** : Next.js (React), Tailwind CSS, Radix UI.
+*   **Backend / DB** : Firebase (Authentication & Firestore NoSQL).
+*   **Langage** : TypeScript (strict).
+*   **Internationalisation** : `next-intl` (Français, Espagnol PE, Anglais).
+
+### Structure des Dossiers ("Où trouver quoi ?")
+
+*   `apps/b2c` : Code source de la boutique (pages, composants UI, hooks B2C).
+*   `apps/b2b` : Code source de l'espace pro (pages "livrables", hooks B2B, contextes auth spécifiques).
+*   `src/app` : Le routeur principal de Next.js.
+    *   `/` : Charge la page d'accueil B2C.
+    *   `/pro` : Route protégée qui charge les pages de `apps/b2b`.
+*   `src/public/locales` : Fichiers JSON contenant TOUS les textes (traductions).
+*   `packages/firebase` : Configuration partagée de la connexion à la base de données.
+
+---
+
+## 🗄️ Modèle de Données (Base de Données Firestore)
+
+L'application utilise **Firestore**. Les données sont organisées en **Collections** (tables) contenant des **Documents** (lignes).
+Voici la structure exacte de chaque collection.
+
+### 1. 🛍️ Catalogue & Contenu
+
+#### `products` (Produits B2C)
+Catalogue principal visible sur le site public.
+*   `slug` (ID) : Chaîne unique (ex: "huile-jojoba").
+*   `category` : Catégorie du produit (ex: "Soins du visage").
+*   `price` : Prix public TTC (Number).
+*   `image` : URL de l'image principale.
+*   `translations` (Map) : Contenu traduit.
+    *   `fr`, `en`, `es-PE` :
+        *   `name` : Nom du produit.
+        *   `desc` : Description courte.
+        *   `long_desc` : Description détaillée.
+
+#### `blogPosts` (Articles de Blog)
+*   `slug` (ID), `image`, `date`, `readTime` (temps de lecture), `category`.
+*   `author` : `{ name, role, avatar }`.
+*   `related` : Liste de slugs d'articles liés.
+*   `translations` : `{ title, excerpt, content[] }`.
+
+#### `rituelsB2B` (Protocoles de Soin Pro)
+Documentation technique pour les esthéticiennes.
+*   `slug`, `reference`, `category`, `image`, `duration`.
+*   `preparation` : Listes d'éléments nécessaires (`cabine`, `materiel`, `produits`).
+*   `deroulement` : Étapes du soin. Liste d'objets :
+    *   `{ phase, duree, description, actions[] }`
+*   `translations` : Traduction de tous les textes ci-dessus.
+
+#### `fichesTechniquesB2B` (Fiches Produits Pro)
+Détails techniques des produits cabine.
+*   `slug`, `reference`, `extraction` (méthode), `volume` (ex: 250ml).
+*   `actifs` : Liste `{ nom, role }` (ingrédients clés).
+*   `utilisation` : `{ frequence, methode, temps, retrait }`.
+*   `translations` : Traduction intégrale.
+
+#### `downloadsB2B` (Zone de Téléchargement)
+Fichiers marketing pour les pros.
+*   `slug`, `type` (image/pdf/video), `category` (PLV, Formation...), `url`, `size`.
+
+---
+
+### 2. 👥 Utilisateurs & Accès
+
+#### `users` (Profils Utilisateurs)
+Lié à l'authentification Firebase Auth via l'ID utilisateur (`uid`).
+*   `email` : Adresse email.
+*   `role` : 'b2c' (client) ou 'b2b' (pro).
+*   `validated` (Boolean) : **CRITIQUE**. Si `false`, l'utilisateur Pro est bloqué sur une page d'attente.
+*   `societe` / `company` : Nom de l'entreprise.
+*   `siret` : Numéro d'identification.
+*   `prenom`, `nom`, `phone`, `address`, `city`, `postalCode`.
+*   `remise` (Number) : Pourcentage de remise personnalisé (optionnel).
+*   `kbisUrl`, `idUrl` : Documents justifiant l'activité pro.
+
+---
+
+### 3. 💰 Commerce (Commandes & Factures)
+
+#### `orders` (Historique des Commandes)
+Historique centralisé des achats.
+*   `userId` : Lien vers la collection `users`.
+*   `createdAt` : Date de commande.
+*   `lines` : Contenu du panier. Liste d'objets `{ name, quantity, slug }`.
+*   `status` : État de la commande.
+
+#### `payments` / Factures
+Utilisé pour générer les tableaux de bord financiers et les PDF.
+*   `orderId` : Référence à la commande.
+*   `invoiceNumber` : Numéro séquentiel unique.
+*   `amountHT`, `amountTTC` : Montants financiers.
+*   `currency` : Devise ('EUR' ou 'PEN').
+*   `status` : 'payee', 'en_attente', 'retard'.
+*   `date`, `dueDate` (échéance).
+*   `pdfFranceUrl`, `pdfPeruUrl` : Liens vers les documents générés (Bucket Storage).
+*   `buyer`, `seller` : Instantané des coordonnées au moment de la facturation (pour l'immutabilité comptable).
+
+#### `reassortConfigsB2B` (Réassort Automatique)
+Configuration pour les commandes récurrentes des pros.
+*   `userId` : Le pro concerné.
+*   `productSlug` : Produit à commander.
+*   `frequency` : Périodicité (ex: "mensuel").
+*   `quantity` : Quantité fixe.
+*   `active` (Boolean) : État de la configuration.
+
+---
+
+## ⚙️ Logique Métier & Workflows
+
+### 🔐 Authentification & Sécurité B2B
+1.  **Inscription** : Le pro remplit un formulaire complet (SIRET, KBIS...).
+2.  **Création** : Un compte `auth` est créé + un document `users` avec `role: 'b2b'` et `validated: false`.
+3.  **ProGate** : À chaque chargement de page `/pro`, le système vérifie :
+    *   Si l'user est connecté.
+    *   Si son rôle est `b2b`.
+    *   SI `validated` est `true`.
+    *   *Sinon -> Redirection forcée vers `/pro/validation`.*
+
+### 🛒 Règles Panier
+*   **B2C** : Panier stocké dans le navigateur (`localStorage`). Pas de limite.
+*   **B2B** :
+    *   Panier stocké dans le navigateur (`localStorage`).
+    *   **Minimum de commande** : 100 unités (ou règle spécifique selon config).
+    *   **Commande Rapide** : Interface tableau pour saisie en masse. Vérifie le stock en temps réel avant validation.
+
+### 🌍 Internationalisation (i18n)
+*   La langue est détectée automatiquement ou choisie via le sélecteur.
+*   Le contenu statique (boutons, menus) vient des fichiers JSON (`src/public/locales`).
+*   Le contenu dynamique (produits, blog) est pioché dans le champ `translations` de la base de données selon la langue active (`fr`, `es-PE` ou `en`).
+*   **Factures** : Le système génère dynamiquement des modèles différents selon la région (modèle FR avec TVA/SIRET vs modèle PE avec RUC/IGV).
+
+---
+
+## 🛠️ Commandes pour le Développeur
+
+| Commande | Action | Description |
+| :--- | :--- | :--- |
+| `npm run dev` | Démarrer | Lance le site en local sur `http://localhost:3000`. |
+| `npm run build` | Vérifier | Compile le projet. Si erreurs (rouges), **le déploiement échouera**. |
+| `npm run lint` | Nettoyer | Analyse le code pour trouver les erreurs de style ou bugs potentiels. |
+
+### Configuration (`.env.local`)
+Ces clés sont **obligatoires** pour que le site fonctionne (connexion à Firebase).
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+# ... (voir documentation technique pour la liste complète)
 ```
-Ouvrir http://localhost:3000.
-
-## Structure des apps
-```
-apps/
-  b2c/
-    app/produits/page.tsx      # listing produits, filtres localisés
-    app/panier/page.tsx        # panier retail (localStorage)
-    lib/cart-context.tsx       # contexte panier B2C
-  b2b/
-    pages/CommandeRapide.tsx   # commande rapide, min qty 100, refs communes
-    pages/CataloguePro.tsx     # catalogue pro
-    pages/Protocoles.tsx       # liste fiches + rituels
-    pages/RituelCabine.tsx     # détail rituel
-    pages/FicheTechnique.tsx   # détail fiche technique
-    pages/Telechargements.tsx  # assets téléchargeables
-    pages/ReassortAuto.tsx     # configs réassort auto (CRUD Firestore)
-    pages/FacturesPro.tsx      # factures depuis payments/orders + PDF FR/PE
-    context/AuthContext.tsx    # auth B2B
-    context/CartContext.tsx    # panier B2B (min 100)
-    hooks/useProductsB2B.ts
-    hooks/useProtocolesB2B.ts
-    hooks/useDownloadsB2B.ts
-    hooks/useReassortB2B.ts
-    hooks/useInvoicesB2B.ts
-packages/firebase/             # init client Firebase + helpers
-src/app/api/seed/route.ts      # seeder Firestore
-```
-
-## Auth & accès
-- Firebase Auth.
-- B2B protégé : role `b2b` + `validated` requis (sinon redirections login/home/validation).
-
-## Hooks principaux
-- `useProductsB2B` : produits Firestore, noms/catégories localisés.
-- `useProtocolesB2B` : liste protocoles + détail rituel/fiche avec fallback locale.
-- `useDownloadsB2B` : assets téléchargeables B2B avec fallback locale.
-- `useReassortB2B` : configs réassort auto (CRUD), historique et stats, sélection produit par liste Firestore.
-- `useInvoicesB2B` : factures depuis `payments` + `orders`, dérive produits, filtres statut/mois, sélection PDF FR/PE par locale.
-
-## Pages clés
-- **B2C** : `produits` (filtres localisés, add to cart), `panier` (CRUD panier).
-- **B2B** :
-  - `CommandeRapide` : min qty 100, références communes depuis commandes user, quick-pick ajoute ligne si besoin.
-  - `CataloguePro` : grid/list, filtres.
-  - `Protocoles` / `RituelCabine` / `FicheTechnique` : Firestore, locale fallback, slugs pour navigation.
-  - `Telechargements` : Firestore `downloadsB2B`, filtres type/catégorie, favoris locaux, stats, loading/erreur.
-  - `ReassortAuto` : configs de réassort auto (CRUD Firestore, modal avec sélection produit), historique et stats.
-  - `FacturesPro` : factures Firestore (`payments` + `orders`), filtres recherche/statut/mois, badges statut, PDF FR ou PE selon locale.
-
-## Modèle de données Firestore
-- **products**
-  - `slug`, `category`, `price`, `image`, `volume?`, `inStock?`
-  - `defaultLocale?`, `translations[locale]{name, desc, category}`
-- **blogPosts**
-  - `slug`, `image`, `date`, `readTime`, `category`
-  - `author{name, role, avatar}`, `related[]`
-  - `translations[locale]{title, excerpt, content[]}`
-- **podcasts**
-  - `slug`, `image`, `date`, `duration`, `guest`
-  - `translations[locale]{title, description, guest_title}`
-- **rituelsB2B**
-  - `slug`, `reference`, `category`, `image`, `theme`, `ambiance`, `duration`
-  - `preparation{cabine[], materiel[], produits[]}`
-  - `deroulement[{phase,duree,description,actions[]}]`
-  - `retail[]`, `notes[]`, `defaultLocale?`
-  - `translations[locale]{title,introduction,theme,ambiance,category,duration,preparation,deroulement,retail,notes}`
-- **fichesTechniquesB2B**
-  - `slug`, `reference`, `category`, `extraction`, `volume`, `image`, `description`
-  - `proprietes[]`, `actifs[{nom,role}]`
-  - `utilisation{frequence,methode,temps,retrait}`
-  - `caracteristiques{texture,odeur,ph,conservation}`
-  - `avis_experts`, `defaultLocale?`
-  - `translations[locale]{title,description,reference,category,extraction,volume,proprietes,actifs,utilisation,caracteristiques,avis_experts}`
-- **downloadsB2B**
-  - `slug`, `type` (image|pdf|video), `category`, `format`, `size`, `url`, `defaultLocale?`
-  - `translations[locale]{title}`
-- **reassortConfigsB2B**
-  - `productSlug`, `productName`, `productRef`, `frequency`, `quantity`, `unit`, `active`, `createdAt`, `updatedAt`, `userId`
-- **reassortHistoryB2B**
-  - `configId`, `status`, `quantity`, `unit`, `createdAt`
-- **notificationsB2B**
-  - `title`, `description`, `time`, `type` (`info`|`warning`|`success`)
-- **quoteRequestsB2B** (Demande de devis)
-  - `form{subject,type,date?,description,quantity?,budget?}`
-  - `products[{id,nom,reference,prixHT,quantite}]`
-  - `totalHT`, `totalTTC`
-  - `attachments[{id,name,size,status,url?,error?}]`
-  - `submittedAt`, `status` (`pending` par défaut)
-- **orders** (utilisé pour références communes B2B et factures)
-  - `userId`, `createdAt`, `lines[{name,quantity,slug?}]`, métadonnées commande.
-- **payments** (lié à `orders`)
-  - `orderId`, `amountHT`, `amountTTC`, `status` (`payee`|`en_attente`|`retard`), `dueDate`, `createdAt`, `pdfFranceUrl?`, `pdfPeruUrl?`
-- **users** : inclut `role` et `validated`.
-
-### Autres collections mentionnées (non seedées ici)
-- **orders** : historique commandes (B2B) pour références communes/quick-pick. Stockage attendu : lignes produit (slug/quantité) + `userId` + métadonnées commande.
-- **payments** (évoquée comme table séparée) : suivi des paiements liés aux commandes.
-- **users** : profil auth Firebase, rôle (`b2b`/`b2c`), champ `validated` (contrôle d’accès B2B). Cette collection existe mais n’est pas peuplée par le seeder.
-
-## Seeder
-- Endpoint `POST /api/seed` (`src/app/api/seed/route.ts`).
-- Remplit : `products`, `blogPosts`, `podcasts`, `rituelsB2B`, `fichesTechniquesB2B`, `downloadsB2B`, `reassortConfigsB2B`, `reassortHistoryB2B`.
-- Utilise batch Firestore + `duplicateLocales` (FR cloné sur autres locales). Pas de collection “protocoles” dérivée (on utilise fiches/rituels).
-
-## i18n
-- `next-intl` pour libellés UI.
-- Fallback locale côté hooks : `defaultLocale` du document ou `fr`.
-- Catégories affichées via labels traduits (B2C/B2B).
-
-## Règles panier
-- **B2C** : panier localStorage, quantités libres.
-- **B2B** : panier localStorage, min 100 sur add/update. CommandeRapide force le clamp et ajoute une ligne si aucune libre pour quick-pick.
-
-## Notes dev
-- Avertissement lint Tailwind préexistant dans `apps/b2c/app/globals.css` (at-rules @tailwind) — inchangé.
-- URLs protocoles utilisent `slug` (pas d’id).
-
-## Changements récents
-- Prix/HT/TTC formatés via `Intl.NumberFormat(locale, EUR)` avec libellés HT/TTC localisés (FR/ES/default) sur B2B (CommandeRapide, Panier, CataloguePro, FacturesPro) et B2C (produits, panier, paiement).
-- Badge panier B2B affiche le nombre de lignes (produits distincts) et non plus la somme des quantités.
-- Pages B2C affichent désormais les prix produits dans les listings/sections (produits + products-section) avec formatage i18n.
-- Incrément/décrément de quantité dans CommandeRapide par pas de 1 (plancher 100), pour éviter des sauts de 100.
-- ReassortAuto formatte aussi les montants selon la locale (formatter partagé, labels HT/TTC gérés via libellés spécifiques).

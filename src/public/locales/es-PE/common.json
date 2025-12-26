@@ -74,18 +74,11 @@
             "register": {
                 "title": "Registro Profesional",
                 "subtitle": "Cree su cuenta B2B con precios al por mayor y descuentos exclusivos",
-                "title_b2c": "Crear mi cuenta Mishki",
-                "subtitle_b2c": "Únete a la comunidad Mishki y disfruta de ofertas exclusivas",
                 "sections": {
                     "personal": "Información personal",
                     "connection": "Información de conexión",
                     "company": "Información de la empresa",
-                    "documents": "Documentos",
-                    "address": "Datos de contacto"
-                },
-                "tabs": {
-                    "b2c": "Cuenta de cliente",
-                    "b2b": "Cuenta profesional"
+                    "documents": "Documentos"
                 },
                 "fields": {
                     "first_name": "Nombre *",
@@ -136,7 +129,6 @@
                 "cgv": "términos y condiciones de venta",
                 "privacy": "política de privacidad",
                 "btn_submit": "Crear mi cuenta profesional",
-                "btn_submit_b2c": "Crear mi cuenta",
                 "btn_submitting": "Registro en curso...",
                 "btn_cancel": "Cancelar",
                 "footer_info": "Su cuenta será validada en 24-48h tras la verificación de sus documentos",
@@ -398,7 +390,7 @@
         },
         "auto_reassort": {
             "title": "Reabastecimiento Automático",
-            "subtitle": "Configure el reabastecimiento automático de sus productos esenciales",
+            "subtitle": "Configura el reabastecimiento automático de tus productos esenciales",
             "btn_new": "Nuevo reabastecimiento",
             "stats": {
                 "active": "Reabastecimientos activos",
@@ -440,33 +432,56 @@
                 "tip1_title": "⚡ Automático",
                 "tip1_desc": "Los pedidos se realizan automáticamente según sus ajustes",
                 "tip2_title": "📊 Optimización",
-                "tip2_desc": "Evite rupturas de stock y optimice su flujo de caja",
+                "tip2_desc": "Evita quiebres de stock y optimiza tu flujo de caja",
                 "tip3_title": "🔔 Notificaciones",
-                "tip3_desc": "Reciba alertas antes de cada reabastecimiento programado"
+                "tip3_desc": "Recibe alertas antes de cada reabastecimiento programado"
             }
         },
-        "layout": {
-            "sidebar": {
-                "nav": {
-                    "home": "Inicio Pro",
-                    "catalogue": "Catálogo",
-                    "cart": "Mi Carrito",
-                    "quick_order": "Pedido Rápido",
-                    "protocoles": "Protocolos",
-                    "downloads": "Descargas",
-                    "auto_reassort": "Reabastecimiento Auto",
-                    "invoices": "Facturas",
-                    "quotes": "Solicitud de Cotización"
-                },
-                "support": {
-                    "help": "¿Necesita ayuda?",
-                    "btn": "Contactar soporte"
-                }
+        "payment": {
+            "title": "Pago",
+            "subtitle": "Validación de tu pedido B2B",
+            "orderSummary": {
+                "title": "Resumen del pedido",
+                "discount": "Descuento profesional aplicado:",
+                "empty": "No hay artículos en tu pedido.",
+                "ref": "Ref: {ref}",
+                "qty": "Cantidad: {qty}",
+                "ht": "Sin IGV",
+                "total": "Total: {amount}"
             },
-            "header": {
-                "welcome": "Bienvenido, {name}",
-                "discount": "{count}% de descuento",
-                "logout": "Cerrar sesión"
+            "shipping": {
+                "title": "Dirección de envío",
+                "useSaved": "Usar la dirección guardada",
+                "newAddress": "Ingresar una nueva dirección",
+                "noSaved": "No hay dirección guardada.",
+                "contact": "Contacto",
+                "contactPlaceholder": "Nombre del contacto",
+                "address": "Dirección",
+                "addressPlaceholder": "Dirección completa",
+                "postalCode": "Código postal",
+                "postalCodePlaceholder": "15000",
+                "city": "Ciudad",
+                "cityPlaceholder": "Lima",
+                "phone": "Teléfono",
+                "phonePlaceholder": "+51 9 ...",
+                "deliveryMode": "Modo de entrega",
+                "deliveryRelay": "Punto de recojo",
+                "deliveryHome": "Entrega a domicilio"
+            },
+            "payment": {
+                "title": "Pago",
+                "paypalLabel": "PayPal (pro) – monto con IGV: {amount}",
+                "processing": "Procesando...",
+                "cardCta": "Pagar con tarjeta (simulación)"
+            },
+            "summary": {
+                "title": "Resumen",
+                "subtotal": "Subtotal {ht}",
+                "tax": "IGV (18%)",
+                "total": "Total con IGV",
+                "badgeSecure": "Pago seguro",
+                "badgeShipping": "Envío con seguimiento",
+                "badgeSupport": "Soporte dedicado pro"
             }
         },
         "cabinet_ritual": {
@@ -876,8 +891,6 @@
                 "payment": {
                     "title": "Información de pago",
                     "use_saved": "Usar su tarjeta registrada",
-                    "card_option": "Pagar con tarjeta",
-                    "paypal_option": "Pagar con PayPal",
                     "card_name_label": "Nombre en la tarjeta",
                     "card_name_placeholder": "Juan Pérez",
                     "card_number_label": "Número de tarjeta",

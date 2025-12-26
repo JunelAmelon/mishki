@@ -2,7 +2,9 @@
 
 import { useLocale } from 'next-intl';
 import { useMemo } from 'react';
+import Link from 'next/link';
 import InvoiceDownloadButton from '@/components/invoice/InvoiceDownloadButton';
+import { useTranslations } from 'next-intl';
 import { InvoiceData } from '@/lib/invoice/types';
 
 type LineInput = {
@@ -23,6 +25,8 @@ type BuyerInput = {
   name?: string | null;
   email?: string | null;
   phone?: string | null;
+  company?: string | null;
+  addressLines?: string[] | null;
 };
 
 type PaymentSuccessModalProps = {
@@ -32,6 +36,7 @@ type PaymentSuccessModalProps = {
   lines: LineInput[];
   totals: TotalsInput | null;
   buyer: BuyerInput;
+  homeHref?: string;
 };
 
 const sellerInfo = {
@@ -42,7 +47,8 @@ const sellerInfo = {
   email: 'facturation@mishki.com',
 };
 
-export default function PaymentSuccessModal({ open, onClose, orderId, lines, totals, buyer }: PaymentSuccessModalProps) {
+export default function PaymentSuccessModal({ open, onClose, orderId, lines, totals, buyer, homeHref = '/pro/accueil' }: PaymentSuccessModalProps) {
+  const t = useTranslations('b2b.payment.success');
   const locale = useLocale();
 
   const userRegion = useMemo(() => {
@@ -69,7 +75,8 @@ export default function PaymentSuccessModal({ open, onClose, orderId, lines, tot
       issueDate: issueDate.toLocaleDateString('fr-FR'),
       buyer: {
         name: buyer.name || 'Client B2B',
-        addressLines: [],
+        company: buyer.company || undefined,
+        addressLines: buyer.addressLines?.filter(Boolean) ?? [],
         phone: buyer.phone || undefined,
         email: buyer.email || undefined,
       },
@@ -90,7 +97,7 @@ export default function PaymentSuccessModal({ open, onClose, orderId, lines, tot
         currency,
       },
     };
-  }, [buyer.email, buyer.name, buyer.phone, lines, orderId, totals, userRegion]);
+  }, [buyer.addressLines, buyer.company, buyer.email, buyer.name, buyer.phone, lines, orderId, totals, userRegion]);
 
   if (!open) return null;
 
@@ -103,21 +110,27 @@ export default function PaymentSuccessModal({ open, onClose, orderId, lines, tot
         >
           ✕
         </button>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Paiement réussi</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('title', { defaultMessage: 'Paiement réussi' })}</h3>
         <p className="text-sm text-gray-600 mb-4">
-          Votre paiement est confirmé. Vous pouvez télécharger la facture dès maintenant.
+          {t('desc', { defaultMessage: 'Votre paiement est confirmé. Vous pouvez télécharger la facture dès maintenant.' })}
         </p>
         {invoiceData ? (
           <InvoiceDownloadButton data={invoiceData} />
         ) : (
-          <p className="text-sm text-red-600">Impossible de préparer la facture.</p>
+          <p className="text-sm text-red-600">{t('error', { defaultMessage: 'Impossible de préparer la facture.' })}</p>
         )}
-        <div className="mt-4 flex justify-end">
+        <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-end">
+          <Link
+            href={homeHref}
+            className="px-4 py-2 rounded-lg bg-[#235730] text-white hover:bg-[#1a4023] transition-colors text-center"
+          >
+            {t('ctaHome', { defaultMessage: 'Accueil pro' })}
+          </Link>
           <button
             onClick={onClose}
             className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
           >
-            Fermer
+            {t('ctaClose', { defaultMessage: 'Fermer' })}
           </button>
         </div>
       </div>

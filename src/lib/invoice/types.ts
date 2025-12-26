@@ -14,6 +14,7 @@ export type InvoiceParty = {
   addressLines: string[];
   city?: string;
   contact?: string;
+  company?: string;
   email?: string;
   phone?: string;
   ruc?: string; // PE

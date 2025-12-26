@@ -445,6 +445,69 @@
                 "tip3_desc": "Recevez des alertes avant chaque réassort programmé"
             }
         },
+        "payment": {
+            "title": "Paiement",
+            "subtitle": "Validation de votre commande B2B",
+            "orderSummary": {
+                "title": "Résumé de commande",
+                "discount": "Remise professionnelle appliquée :",
+                "empty": "Aucun article dans votre commande.",
+                "ref": "Ref : {ref}",
+                "qty": "Quantité : {qty}",
+                "ht": "HT",
+                "total": "Total : {amount}"
+            },
+            "shipping": {
+                "title": "Adresse de livraison",
+                "useSaved": "Utiliser l'adresse enregistrée",
+                "newAddress": "Saisir une nouvelle adresse",
+                "noSaved": "Aucune adresse enregistrée.",
+                "contact": "Contact",
+                "contactPlaceholder": "Nom du contact",
+                "address": "Adresse",
+                "addressPlaceholder": "Adresse complète",
+                "postalCode": "Code postal",
+                "postalCodePlaceholder": "75001",
+                "city": "Ville",
+                "cityPlaceholder": "Paris",
+                "phone": "Téléphone",
+                "phonePlaceholder": "+33 6 ...",
+                "deliveryMode": "Mode de livraison",
+                "deliveryRelay": "Point relais",
+                "deliveryHome": "Livraison à domicile"
+            },
+            "payment": {
+                "title": "Paiement",
+                "paypalLabel": "PayPal (pro) – montant TTC : {amount}",
+                "processing": "Traitement en cours...",
+                "cardCta": "Payer par carte (simulation)"
+            },
+            "summary": {
+                "title": "Récapitulatif",
+                "subtotal": "Sous-total {ht}",
+                "tax": "TVA (20%)",
+                "total": "Total TTC",
+                "badgeSecure": "Paiement sécurisé",
+                "badgeShipping": "Livraison suivie",
+                "badgeSupport": "Assistance dédiée pro"
+            },
+            "success": {
+                "title": "Paiement réussi",
+                "desc": "Votre paiement est confirmé. Vous pouvez télécharger la facture dès maintenant.",
+                "error": "Impossible de préparer la facture.",
+                "ctaHome": "Accueil pro",
+                "ctaClose": "Fermer",
+                "invoice": {
+                    "title": "Détails de la facture",
+                    "order": "Commande : {order}",
+                    "total": "Montant TTC : {amount}",
+                    "email": "La facture sera également envoyée par email."
+                },
+                "billing": {
+                    "title": "Coordonnées de facturation"
+                }
+            }
+        },
         "layout": {
             "sidebar": {
                 "nav": {

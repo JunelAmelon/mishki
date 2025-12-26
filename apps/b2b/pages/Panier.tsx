@@ -16,9 +16,6 @@ import {
   Package,
   CreditCard,
 } from 'lucide-react';
-import PaypalButton from '@/components/payments/PaypalButton';
-import { useCheckoutB2B } from '../hooks/useCheckoutB2B';
-import PaymentSuccessModal from '../components/PaymentSuccessModal';
 import { useProductsB2B } from '../hooks/useProductsB2B';
 
 export default function Panier() {
@@ -26,18 +23,8 @@ export default function Panier() {
   const locale = useLocale();
   const { items, removeFromCart, updateQuantity, clearCart, total } = useCart();
   const { user } = useAuth();
-  const { createOrderAndPayment } = useCheckoutB2B();
   const { products } = useProductsB2B();
   const router = useRouter();
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paypalError, setPaypalError] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [orderIdSnapshot, setOrderIdSnapshot] = useState<string | null>(null);
-  const [linesSnapshot, setLinesSnapshot] = useState<
-    { description: string; code?: string; qty: number; unitPrice: number }[]
-  >([]);
-  const [totalsSnapshot, setTotalsSnapshot] = useState<{ subtotalHT: number; tax: number; totalTTC: number; currency: string } | null>(null);
   const minQty = 100;
   const [stockMessages, setStockMessages] = useState<Record<string, string>>({});
 
@@ -104,65 +91,34 @@ export default function Panier() {
   const totalRemise = total - totalHT;
   const tva = totalHT * 0.2;
   const totalTTC = totalHT + tva;
-  const paypalAmount = totalTTC;
-
-  const openPaymentModal = () => {
-    setPaypalError('');
-    setShowPaymentModal(true);
-  };
-
-  const handlePaypalSuccess = async (payload?: { orderId?: string }) => {
-    setSaving(true);
-    try {
-      const lines = items.map((item) => {
-        const prixRemise = calculateRemise(item.prixHT);
-        return {
-          name: item.nom,
-          reference: item.reference,
-          quantity: item.quantite,
-          unitPriceHT: prixRemise,
-          totalHT: prixRemise * item.quantite,
-        };
-      });
-      const invoiceLines = lines.map((l) => ({
-        description: l.name,
-        code: l.reference,
-        qty: l.quantity,
-        unitPrice: l.unitPriceHT,
-      }));
-      const totals = {
+  const goToPaymentPage = () => {
+    const lines = items.map((item) => {
+      const prixRemise = calculateRemise(item.prixHT);
+      return {
+        name: item.nom,
+        reference: item.reference,
+        quantity: item.quantite,
+        unitPriceHT: prixRemise,
+        totalHT: prixRemise * item.quantite,
+      };
+    });
+    const draft = {
+      source: 'cart' as const,
+      lines,
+      totals: {
         subtotalHT: totalHT,
         tax: tva,
         totalTTC,
         currency: 'EUR' as const,
-      };
-      await createOrderAndPayment({
-        user,
-        lines,
-        totals,
-        paymentProvider: 'paypal',
-        paymentId: payload?.orderId ?? null,
-        status: 'payee',
-      });
-      setShowPaymentModal(false);
-      setOrderIdSnapshot(payload?.orderId ?? null);
-      setLinesSnapshot(invoiceLines);
-      setTotalsSnapshot(totals);
-      setShowSuccessModal(true);
-      clearCart();
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Erreur de paiement PayPal';
-      setPaypalError(msg);
-    } finally {
-      setSaving(false);
+      },
+    };
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('b2bPaymentDraft', JSON.stringify(draft));
     }
+    router.push('/pro/paiement');
   };
 
-  const handlePaypalError = (msg: string) => {
-    setPaypalError(msg || 'Erreur de paiement PayPal');
-  };
-
-  if (items.length === 0 && !showPaymentModal && !showSuccessModal) {
+  if (items.length === 0) {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
@@ -336,7 +292,12 @@ export default function Panier() {
         {/* Order Summary */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-6">
-            <h3 className="text-gray-900 mb-4">{t('summary.title')}</h3>
+            <h3 className="text-gray-900 mb-2">{t('summary.title')}</h3>
+            {user?.remise ? (
+              <p className="text-sm text-gray-700 mb-2">
+                Remise pro appliquée : <span className="font-semibold text-[#235730]">{user.remise}%</span>
+              </p>
+            ) : null}
 
             <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
               <div className="flex justify-between text-sm">
@@ -368,7 +329,7 @@ export default function Panier() {
             </div>
 
             <button
-              onClick={openPaymentModal}
+              onClick={goToPaymentPage}
               className="w-full py-3 rounded-lg text-white transition-colors flex items-center justify-center gap-2 mb-3"
               style={{ backgroundColor: '#235730' }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1a4023')}
@@ -400,48 +361,6 @@ export default function Panier() {
         </div>
       </div>
     </div>
-    {showPaymentModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-        <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
-          <button
-            onClick={() => setShowPaymentModal(false)}
-            className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
-          >
-            ✕
-          </button>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Paiement PayPal</h3>
-          <p className="text-sm text-gray-600 mb-4">
-            {t('summary.total_ttc')} ({ttcLabel}) : <span className="font-semibold text-gray-900">{formatMoney.format(totalTTC)}</span>
-          </p>
-          {paypalError && (
-            <div className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-              {paypalError}
-            </div>
-          )}
-          {saving && <p className="text-sm text-gray-500 mb-2">Traitement en cours...</p>}
-          <PaypalButton
-            amount={paypalAmount}
-            currency="EUR"
-            disabled={saving}
-            onSuccess={handlePaypalSuccess}
-            onError={handlePaypalError}
-          />
-        </div>
-      </div>
-    )}
-    {showSuccessModal && totalsSnapshot && (
-      <PaymentSuccessModal
-        open={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
-        orderId={orderIdSnapshot}
-        lines={linesSnapshot}
-        totals={totalsSnapshot}
-        buyer={{
-          name: user?.societe || user?.nom || 'Client B2B',
-          email: user?.email || undefined,
-        }}
-      />
-    )}
     </>
   );
 }
